@@ -60,25 +60,16 @@ public class UserInfoControllerTest {
         userInfoDtoExpect.setEmail("joesmith@ss.com");
         userInfoDtoExpect.setCreated(null);
         userInfoDtoExpect.setDeleted(null);
-        userInfoDtoExpect.setConfirmed(true);
+        userInfoDtoExpect.setConfirmed(true); 
         userInfoDtoExpect.setLocked(false);
     }
     
     @Test
     public void getUserByIdJsonTest() throws Exception {
     	given(userInfoService.findUserById(1)).willReturn(userInfoDtoActual);
-    	MockHttpServletResponse jsonResponse = mvc.perform(get("/api/v1/users/1").accept(MediaType.APPLICATION_JSON_VALUE)).andReturn().getResponse();
+    	MockHttpServletResponse jsonResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
     	
         assertThat(jsonResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(jsonResponse.getContentAsString()).isEqualTo(jsonUserInfoDto.write(userInfoDtoExpect).getJson());
-    }
-    
-    @Test
-    public void getUserByIdXmlTest() throws Exception {
-    	given(userInfoService.findUserById(1)).willReturn(userInfoDtoActual);
-    	MockHttpServletResponse xmlResponse = mvc.perform(get("/api/v1/users/1").accept(MediaType.APPLICATION_XML_VALUE)).andReturn().getResponse();
-    	
-        assertThat(xmlResponse.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(xmlResponse.getContentAsString()).isEqualTo(new XmlMapper().writeValueAsString(userInfoDtoExpect));
     }
 }

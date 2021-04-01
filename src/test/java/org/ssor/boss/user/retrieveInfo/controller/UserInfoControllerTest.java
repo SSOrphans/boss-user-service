@@ -60,7 +60,7 @@ public class UserInfoControllerTest {
         userInfoDtoExpect.setEmail("joesmith@ss.com");
         userInfoDtoExpect.setCreated(null);
         userInfoDtoExpect.setDeleted(null);
-        userInfoDtoExpect.setConfirmed(true); 
+        userInfoDtoExpect.setConfirmed(true);
         userInfoDtoExpect.setLocked(false);
     }
     

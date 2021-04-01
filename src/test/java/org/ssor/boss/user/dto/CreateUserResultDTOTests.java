@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CreateUserResultDTOTest
+class CreateUserResultDTOTests
 {
   static CreateUserResultDTO createUserResultDTO1;
   static CreateUserResultDTO createUserResultDTO2;

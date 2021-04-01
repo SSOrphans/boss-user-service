@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CreateUserInputDTOTests
+class CreateUserInputDTOTests
 {
   static CreateUserInputDTO createUserInputDTO1;
   static CreateUserInputDTO createUserInputDTO2;

@@ -20,7 +20,7 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user", schema = "BoSS")
+@Table(name = "user")
 public class UserEntity implements Serializable
 {
   @Id

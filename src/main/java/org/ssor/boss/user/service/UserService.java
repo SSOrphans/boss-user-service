@@ -23,6 +23,7 @@ public class UserService
   public static final String NULL_EMAIL_MESSAGE = "User email must not be null";
   public static final String NULL_PASSWORD_MESSAGE = "User password must not be null";
   public static final String USER_TAKEN_MESSAGE = "User with email or username already taken";
+  public static final String INVALID_USER_ID = "No such user with id: ";
   private final UserRepository userRepository;
 
   public Iterable<UserEntity> getAllUsers()
@@ -45,15 +46,8 @@ public class UserService
     if (createUserInputDTO.getPassword() == null)
       throw new IllegalArgumentException(NULL_PASSWORD_MESSAGE);
 
-    final var matchingEntity = new UserEntity();
-    matchingEntity.setDisplayName(createUserInputDTO.getDisplayName());
-    matchingEntity.setEmail(createUserInputDTO.getEmail());
-
-    final var matcher = ExampleMatcher.matchingAny().withMatcher("display_name", exact())
-                                      .withMatcher("email", exact());
-    final var example = Example.of(matchingEntity, matcher);
-    final var exists = userRepository.exists(example);
-    if (exists) // TODO: Replace with UserAlreadyExistsException.
+    if (userRepository.checkUserExists(createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail()))
+      // TODO: Replace with UserAlreadyExistsException.
       throw new IllegalArgumentException(USER_TAKEN_MESSAGE);
 
     // Action.
@@ -76,9 +70,11 @@ public class UserService
   {
     if (createUserInputDTO == null)
       throw new IllegalArgumentException(NULL_DTO_MESSAGE);
+
     final var user = getUserWithId(id);
     if (user == null)
-      throw new IllegalArgumentException(String.format("No such user with id: %d", id));
+      throw new IllegalArgumentException(INVALID_USER_ID + id);
+
     if (createUserInputDTO.getDisplayName() != null)
       user.setDisplayName(createUserInputDTO.getDisplayName());
     if (createUserInputDTO.getEmail() != null)

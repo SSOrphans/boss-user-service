@@ -8,7 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ssor.boss.user.dto.UserDTO;
+import org.ssor.boss.user.dto.CreateUserInputDTO;
+import org.ssor.boss.user.dto.CreateUserResultDTO;
 import org.ssor.boss.user.entity.UserEntity;
 import org.ssor.boss.user.repository.UserRepository;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -61,6 +63,83 @@ class UserServiceTests
   }
 
   @Test
+  void test_CanCreateUserFromInputWithoutError()
+  {
+    final var input = new CreateUserInputDTO("monkey", "me@example.com", "password");
+    final var createdAt = LocalDateTime.now();
+    final var postUser = new UserEntity(null, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
+    final var returnedUser = new UserEntity(5, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
+    final var output = new CreateUserResultDTO(5, input.getDisplayName(), input.getEmail(), createdAt);
+    doAnswer(invocation -> {
+      users.add(returnedUser);
+      return returnedUser;
+    }).when(userRepository).save(postUser);
+
+    final var captor = ArgumentCaptor.forClass(UserEntity.class);
+    final var result = userService.createUser(input, createdAt);
+    verify(userRepository).save(captor.capture());
+    assertThat(captor.getValue()).isEqualTo(postUser);
+    assertThat(result).isEqualTo(output);
+  }
+
+  @Test
+  void test_CanCreateUserFromInputThrowsIAEOnNullDTO()
+  {
+    assertThatThrownBy(() -> userService.createUser(null, LocalDateTime.now()))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.NULL_DTO_MESSAGE);
+  }
+
+  @Test
+  void test_CanCreateUserFromInputThrowsIAEOnNullLDT()
+  {
+    final var input = new CreateUserInputDTO("monkey", "me@example.com", "password");
+    assertThatThrownBy(() -> userService.createUser(input, null))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.NULL_LDT_MESSAGE);
+  }
+
+  @Test
+  void test_CanCreateUserFromInputThrowsIAEOnNullUsername()
+  {
+    final var input = new CreateUserInputDTO(null, "me@example.com", "password");
+    assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.NULL_USERNAME_MESSAGE);
+  }
+
+  @Test
+  void test_CanCreateUserFromInputThrowsIAEOnNullEmail()
+  {
+    final var input = new CreateUserInputDTO("monkey", null, "password");
+    assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.NULL_EMAIL_MESSAGE);
+  }
+
+  @Test
+  void test_CanCreateUserFromInputThrowsIAEOnNullPassword()
+  {
+    final var input = new CreateUserInputDTO("monkey", "me@example.com", null);
+    assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.NULL_PASSWORD_MESSAGE);
+  }
+
+  @Test
+  void test_CannotCreateUserFromInputBecauseUserIsTaken()
+  {
+    final var input = new CreateUserInputDTO("username", "me@example.com", "password");
+
+    // We're forcing the mock to return true so the code path gets executed.
+    doReturn(true).when(userRepository).exists(any());
+
+    assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(UserService.USER_TAKEN_MESSAGE);
+  }
+
+  @Test
   void test_CanFilterUserFromRepositoryWithValidRetrieval()
   {
     final var user = users.get(0);
@@ -86,18 +165,17 @@ class UserServiceTests
   }
 
   @Test
-  void test_CanUpdateUserFromRepositoryThrowsNullPointerException()
+  void test_CanUpdateUserFromRepositoryThrowsIllegalArgumentException()
   {
-    final var result = Optional.ofNullable(users.get(0));
-    doReturn(result).when(userRepository).findById(1);
     assertThatThrownBy(() -> userService.updateUserWithId(1, null))
-      .isInstanceOf(NullPointerException.class);
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("User data transfer object must not be null");
   }
 
   @Test
   void test_CanUpdateUserFromRepositoryWithValidId()
   {
-    final var userDTO = new UserDTO("Monkey", "john.christman@smoothstack.com", "newPassword");
+    final var userDTO = new CreateUserInputDTO("Monkey", "john.christman@smoothstack.com", "newPassword");
     final var originalUser = Optional.of(users.get(0));
     final var updatedUser = users.get(0);
     updatedUser.setDisplayName(userDTO.getDisplayName());
@@ -114,7 +192,7 @@ class UserServiceTests
   @Test
   void test_CannotUpdateUserFromRepositoryWithInvalidId()
   {
-    final var userDTO = new UserDTO("Monkey", "john.christman@smoothstack.com", "newPassword");
+    final var userDTO = new CreateUserInputDTO("Monkey", "john.christman@smoothstack.com", "newPassword");
     doReturn(Optional.ofNullable(null)).when(userRepository).findById(5);
 
     final var captor = ArgumentCaptor.forClass(Integer.class);

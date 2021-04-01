@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.ssor.boss.user.dto.UserDTO;
+import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.entity.UserEntity;
 import org.ssor.boss.user.service.UserService;
 
@@ -37,7 +37,7 @@ public class UserController
 
   @PostMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-  public void addNewUser(@RequestBody UserDTO userDTO)
+  public void addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
   {
 
   }
@@ -49,9 +49,10 @@ public class UserController
   }
 
   @PutMapping(value = "{user_id}")
-  public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody UserDTO userDTO)
+  public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody
+    CreateUserInputDTO createUserInputDTO)
   {
-    userService.updateUserWithId(userId, userDTO);
+    userService.updateUserWithId(userId, createUserInputDTO);
   }
 
   @DeleteMapping(value = "{user_id}")

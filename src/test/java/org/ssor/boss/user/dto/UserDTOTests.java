@@ -3,9 +3,7 @@ package org.ssor.boss.user.dto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UserDTOTests
 {
@@ -25,10 +23,10 @@ public class UserDTOTests
   void test_CanCreateWithAllParametersAndGetProperties()
   {
     userDTO1 = new UserDTO("LeftRuleMatters", "john.christman@smoothstack.com", "password");
-    assertNotNull(userDTO1);
-    assertEquals("LeftRuleMatters", userDTO1.getDisplayName());
-    assertEquals("john.christman@smoothstack.com", userDTO1.getEmail());
-    assertEquals("password", userDTO1.getPassword());
+    assertThat(userDTO1).isNotNull();
+    assertThat(userDTO1.getDisplayName()).isEqualTo("LeftRuleMatters");
+    assertThat(userDTO1.getEmail()).isEqualTo("john.christman@smoothstack.com");
+    assertThat(userDTO1.getPassword()).isEqualTo("password");
   }
 
   @Test
@@ -37,8 +35,8 @@ public class UserDTOTests
     userDTO1 = new UserDTO("LeftRuleMatters", "john.christman@smoothstack.com", "password");
     userDTO2 = new UserDTO("SoraKatadzuma", "sorakatadzuma@gmail.com", "password");
     userDTO3 = new UserDTO("LeftRuleMatters", "john.christman@smoothstack.com", "password");
-    assertNotEquals(userDTO2, userDTO1);
-    assertEquals(userDTO3, userDTO1);
+    assertThat(userDTO1).isNotEqualTo(userDTO2);
+    assertThat(userDTO1).isEqualTo(userDTO3);
   }
 
   @Test
@@ -47,7 +45,7 @@ public class UserDTOTests
     userDTO1 = new UserDTO("LeftRuleMatters", "john.christman@smoothstack.com", "password");
     userDTO2 = new UserDTO("SoraKatadzuma", "sorakatadzuma@gmail.com", "password");
     userDTO3 = new UserDTO("LeftRuleMatters", "john.christman@smoothstack.com", "password");
-    assertNotEquals(userDTO2.hashCode(), userDTO1.hashCode());
-    assertEquals(userDTO3.hashCode(), userDTO1.hashCode());
+    assertThat(userDTO1.hashCode()).isNotEqualTo(userDTO2.hashCode());
+    assertThat(userDTO1.hashCode()).isEqualTo(userDTO3.hashCode());
   }
 }

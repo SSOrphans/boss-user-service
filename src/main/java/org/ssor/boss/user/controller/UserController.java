@@ -1,9 +1,10 @@
 package org.ssor.boss.user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,8 +35,9 @@ public class UserController
     return userService.getAllUsers();
   }
 
-  @PostMapping(produces = { APPLICATION_JSON_VALUE }, consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-  public void addNewUserJSON(@RequestBody UserDTO userDTO)
+  @PostMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
+               consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
+  public void addNewUser(@RequestBody UserDTO userDTO)
   {
 
   }
@@ -46,9 +48,15 @@ public class UserController
     return userService.getUserWithId(userId);
   }
 
-  @PatchMapping(value = "{user_id}")
+  @PutMapping(value = "{user_id}")
   public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody UserDTO userDTO)
   {
+    userService.updateUserWithId(userId, userDTO);
+  }
 
+  @DeleteMapping(value = "{user_id}")
+  public void deleteUserWithId(@RequestParam(name = "user_id") Integer userId)
+  {
+    userService.deleteUserWithId(userId);
   }
 }

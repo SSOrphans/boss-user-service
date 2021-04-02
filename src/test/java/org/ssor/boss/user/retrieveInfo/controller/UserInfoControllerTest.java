@@ -17,7 +17,7 @@ import org.ssor.boss.user.retrieveInfo.dto.UserInfoDto;
 import org.ssor.boss.user.retrieveInfo.service.UserInfoService;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
@@ -64,8 +64,8 @@ public class UserInfoControllerTest {
     }
     
     @Test
-    public void getUserByIdTest() throws Exception {
-    	given(userInfoService.findUserById(1)).willReturn(userInfoDtoActual);
+    public void getUserByIdJsonTest() throws Exception {
+    	when(userInfoService.findUserById(1)).thenReturn(userInfoDtoActual);
     	MockHttpServletResponse jsonResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
     	
         assertThat(jsonResponse.getStatus()).isEqualTo(HttpStatus.OK.value());

@@ -4,7 +4,7 @@
 package org.ssor.boss.user.retrieveInfo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -61,7 +61,7 @@ public class UserInfoServiceTest {
     
     @Test
     public void findUserByIdTest() {
-        given(userInfoDao.findById(1)).willReturn(Optional.of(userInfoActual));
+        when(userInfoDao.findById(1)).thenReturn(Optional.of(userInfoActual));
         assertThat(userInfoService.findUserById(1).equals(userInfoExpect));
     }
 }

@@ -1,17 +1,20 @@
 package org.ssor.boss.user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
+import org.ssor.boss.user.dto.CreateUserResultDTO;
 import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.service.UserService;
+
+import java.time.LocalDateTime;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
@@ -24,7 +27,7 @@ public class UserController
   private UserService userService;
 
   @Autowired
-  public void setUserRepository(UserService userService)
+  public void setUserService(UserService userService)
   {
     this.userService = userService;
   }
@@ -37,27 +40,43 @@ public class UserController
 
   @PostMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-  public void addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
+  public ResponseEntity<Object>
+    addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
   {
+    CreateUserResultDTO userResultDTO;
+    try
+    {
+      userResultDTO = userService.createUser(createUserInputDTO, LocalDateTime.now());
+    }
+    catch (IllegalArgumentException iae)
+    {
+      // Bad request.
+      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+    catch (UserAlreadyExistsException uaee)
+    {
+      return new ResponseEntity<>(uaee.getMessage(), HttpStatus.CONFLICT);
+    }
 
+    return new ResponseEntity<>(userResultDTO, HttpStatus.CREATED);
   }
 
-  @GetMapping(value = "{user_id}")
-  public UserEntity getUserWithId(@RequestParam(name = "user_id") Integer userId)
-  {
-    return userService.getUserWithId(userId);
-  }
-
-  @PutMapping(value = "{user_id}")
-  public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody
-    CreateUserInputDTO createUserInputDTO)
-  {
-    userService.updateUserWithId(userId, createUserInputDTO);
-  }
-
-  @DeleteMapping(value = "{user_id}")
-  public void deleteUserWithId(@RequestParam(name = "user_id") Integer userId)
-  {
-    userService.deleteUserWithId(userId);
-  }
+//  @GetMapping(value = "{user_id}")
+//  public UserEntity getUserWithId(@RequestParam(name = "user_id") Integer userId)
+//  {
+//    return userService.getUserWithId(userId);
+//  }
+//
+//  @PutMapping(value = "{user_id}")
+//  public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody
+//    CreateUserInputDTO createUserInputDTO)
+//  {
+//    userService.updateUserWithId(userId, createUserInputDTO);
+//  }
+//
+//  @DeleteMapping(value = "{user_id}")
+//  public void deleteUserWithId(@RequestParam(name = "user_id") Integer userId)
+//  {
+//    userService.deleteUserWithId(userId);
+//  }
 }

@@ -1,17 +1,14 @@
 package org.ssor.boss.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
 import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +19,6 @@ public class UserService
   public static final String NULL_USERNAME_MESSAGE = "User display name must not be null";
   public static final String NULL_EMAIL_MESSAGE = "User email must not be null";
   public static final String NULL_PASSWORD_MESSAGE = "User password must not be null";
-  public static final String USER_TAKEN_MESSAGE = "User with email or username already taken";
   public static final String INVALID_USER_ID = "No such user with id: ";
   private final UserRepository userRepository;
 
@@ -47,8 +43,7 @@ public class UserService
       throw new IllegalArgumentException(NULL_PASSWORD_MESSAGE);
 
     if (userRepository.checkUserExists(createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail()))
-      // TODO: Replace with UserAlreadyExistsException.
-      throw new IllegalArgumentException(USER_TAKEN_MESSAGE);
+      throw new UserAlreadyExistsException();
 
     // Action.
     final var user = new UserEntity(null, createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail(),

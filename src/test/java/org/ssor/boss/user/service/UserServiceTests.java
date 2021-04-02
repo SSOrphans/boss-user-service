@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
 import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -146,8 +147,8 @@ class UserServiceTests
     doReturn(true).when(userRepository).checkUserExists(any(), any());
 
     assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage(UserService.USER_TAKEN_MESSAGE);
+      .isInstanceOf(UserAlreadyExistsException.class)
+      .hasMessage(UserAlreadyExistsException.USER_TAKEN_MESSAGE);
     verify(userRepository, never()).save(any());
   }
 

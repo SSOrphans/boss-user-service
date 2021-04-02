@@ -42,27 +42,29 @@ public class UserInfoControllerTest {
     
     @BeforeEach
     public void initUserInfoDto() {
-    	userInfoDtoActual = new UserInfoDto();
-        userInfoDtoActual.setUserId(1);
-        userInfoDtoActual.setDisplayName("Joe Smith");
-        userInfoDtoActual.setEmail("joesmith@ss.com");
-        userInfoDtoActual.setCreated(null);
-        userInfoDtoActual.setDeleted(null);
-        userInfoDtoActual.setConfirmed(true);
-        userInfoDtoActual.setLocked(false);
+    	userInfoDtoActual = UserInfoDto.builder()
+				.userId(1)
+				.displayName("Joe Smith")
+				.email("joesmith@ss.com")
+				.created(null)
+				.deleted(null)
+				.confirmed(true)
+				.locked(false)
+				.build();
         
-    	userInfoDtoExpect = new UserInfoDto();
-        userInfoDtoExpect.setUserId(1);
-        userInfoDtoExpect.setDisplayName("Joe Smith");
-        userInfoDtoExpect.setEmail("joesmith@ss.com");
-        userInfoDtoExpect.setCreated(null);
-        userInfoDtoExpect.setDeleted(null);
-        userInfoDtoExpect.setConfirmed(true);
-        userInfoDtoExpect.setLocked(false);
+    	userInfoDtoExpect = UserInfoDto.builder()
+				.userId(1)
+				.displayName("Joe Smith")
+				.email("joesmith@ss.com")
+				.created(null)
+				.deleted(null)
+				.confirmed(true)
+				.locked(false)
+				.build();
     }
     
     @Test
-    public void getUserByIdJsonTest() throws Exception {
+    public void getUserByIdTest() throws Exception {
     	given(userInfoService.findUserById(1)).willReturn(userInfoDtoActual);
     	MockHttpServletResponse jsonResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
     	

@@ -12,10 +12,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * @author Christian Angeles
  *
  */
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "user")
 public class UserInfo {
@@ -48,78 +59,4 @@ public class UserInfo {
 	
 	@Column(name = "locked")
 	private Boolean locked;
-	
-
-	public Integer getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public Timestamp getCreated() {
-		return created;
-	}
-
-	public void setCreated(Timestamp created) {
-		this.created = created;
-	}
-
-	public Timestamp getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(Timestamp deleted) {
-		this.deleted = deleted;
-	}
-
-	public Integer getGrants() {
-		return grants;
-	}
-
-	public void setGrants(Integer grants) {
-		this.grants = grants;
-	}
-
-	public Boolean getConfirmed() {
-		return confirmed;
-	}
-
-	public void setConfirmed(Boolean confirmed) {
-		this.confirmed = confirmed;
-	}
-
-	public Boolean getLocked() {
-		return locked;
-	}
-
-	public void setLocked(Boolean locked) {
-		this.locked = locked;
-	}
-	
 }

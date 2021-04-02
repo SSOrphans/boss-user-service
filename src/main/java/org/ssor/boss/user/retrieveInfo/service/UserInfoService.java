@@ -27,16 +27,14 @@ public class UserInfoService {
 	}
 	
 	private UserInfoDto convertToUserDto(Optional<UserInfo> userInfo) {
-		UserInfoDto userInfoDto = new UserInfoDto();
-		
-		userInfoDto.setUserId(userInfo.map(user -> user.getUserId()).orElse(null));
-		userInfoDto.setDisplayName(userInfo.map(user -> user.getDisplayName()).orElse(null));
-		userInfoDto.setEmail(userInfo.map(user -> user.getEmail()).orElse(null));
-		userInfoDto.setCreated(userInfo.map(user -> user.getCreated()).orElse(null));
-		userInfoDto.setDeleted(userInfo.map(user -> user.getDeleted()).orElse(null));
-		userInfoDto.setConfirmed(userInfo.map(user -> user.getConfirmed()).orElse(null));
-		userInfoDto.setLocked(userInfo.map(user -> user.getLocked()).orElse(null));
-		
-		return userInfoDto;
+		return UserInfoDto.builder()
+				.userId(userInfo.map(user -> user.getUserId()).orElse(null))
+				.displayName(userInfo.map(user -> user.getDisplayName()).orElse(null))
+				.email(userInfo.map(user -> user.getEmail()).orElse(null))
+				.created(userInfo.map(user -> user.getCreated()).orElse(null))
+				.deleted(userInfo.map(user -> user.getDeleted()).orElse(null))
+				.confirmed(userInfo.map(user -> user.getConfirmed()).orElse(null))
+				.locked(userInfo.map(user -> user.getLocked()).orElse(null))
+				.build();
 	}
 }

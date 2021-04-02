@@ -11,48 +11,52 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ssor.boss.user.retrieveInfo.dao.UserInfoDao;
 import org.ssor.boss.user.retrieveInfo.dto.UserInfoDto;
 import org.ssor.boss.user.retrieveInfo.entity.UserInfo;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * @author Christian Angeles
  *
  */
-@WebMvcTest(UserInfoService.class)
+@ExtendWith(MockitoExtension.class)
 public class UserInfoServiceTest {
 	
-	@Autowired
-	private UserInfoService userInfoService;
 
-    @MockBean
+    @Mock
     private UserInfoDao userInfoDao;
+    
+    @InjectMocks
+	private UserInfoService userInfoService;
     
     private UserInfo userInfoActual;
     private UserInfoDto userInfoExpect;
     
     @BeforeEach
     public void initUserInfo() {
-    	userInfoActual = new UserInfo();
-        userInfoActual.setUserId(1);
-        userInfoActual.setDisplayName("Joe Smith");
-        userInfoActual.setEmail("joesmith@ss.com");
-        userInfoActual.setCreated(new Timestamp(2077-01-01));
-        userInfoActual.setDeleted(null);
-        userInfoActual.setConfirmed(true);
-        userInfoActual.setLocked(false);
+    	userInfoActual = UserInfo.builder()
+				.userId(1)
+				.displayName("Joe Smith")
+				.email("joesmith@ss.com")
+				.created(new Timestamp(2077-01-01))
+				.deleted(null)
+				.confirmed(true)
+				.locked(false)
+				.build();
 
-    	userInfoExpect = new UserInfoDto();
-        userInfoExpect.setUserId(1);
-        userInfoExpect.setDisplayName("Joe Smith");
-        userInfoExpect.setEmail("joesmith@ss.com");
-        userInfoExpect.setCreated(new Timestamp(2077-01-01));
-        userInfoExpect.setDeleted(null);
-        userInfoExpect.setConfirmed(true);
-        userInfoExpect.setLocked(false);
+    	userInfoExpect = UserInfoDto.builder()
+				.userId(1)
+				.displayName("Joe Smith")
+				.email("joesmith@ss.com")
+				.created(new Timestamp(2077-01-01))
+				.deleted(null)
+				.confirmed(true)
+				.locked(false)
+				.build();
     }
     
     @Test

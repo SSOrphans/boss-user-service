@@ -3,7 +3,6 @@
  */
 package org.ssor.boss.user.retrieveInfo.exception;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

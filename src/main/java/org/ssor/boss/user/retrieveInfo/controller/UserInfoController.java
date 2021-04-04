@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.ssor.boss.user.retrieveInfo.dto.UserInfoDto;
 import org.ssor.boss.user.retrieveInfo.service.UserInfoService;
 
-
 /**
  * @author Christian Angeles
  *
@@ -23,10 +22,9 @@ public class UserInfoController {
 
 	@Autowired
 	UserInfoService userService;
-	
-	@RequestMapping(path = "/users/{user_id}", 
-					produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE}, 
-					method = RequestMethod.GET)
+
+	@RequestMapping(path = "/users/{user_id}", produces = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.APPLICATION_XML_VALUE }, method = RequestMethod.GET)
 	public UserInfoDto getUserById(@PathVariable("user_id") Integer userId) {
 		return userService.findUserById(userId);
 	}

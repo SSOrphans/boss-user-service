@@ -16,12 +16,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class ControllerExceptionHandler {
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
-	public ResponseEntity<ErrorMessage> typeMismatchException () {
-		return ResponseEntity.badRequest()
-				.body(ErrorMessage.builder()
-						.status("400")
-						.error("Bad Request")
-						.message("Malformed request syntax")
-						.build());
+	public ResponseEntity<ErrorMessage> typeMismatchException() {
+		return ResponseEntity.badRequest().body(
+				ErrorMessage.builder().status("400").error("Bad Request").message("Malformed request syntax").build());
 	}
 }

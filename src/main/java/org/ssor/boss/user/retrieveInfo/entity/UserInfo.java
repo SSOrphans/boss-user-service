@@ -30,33 +30,59 @@ import lombok.Setter;
 @Entity
 @Table(name = "user")
 public class UserInfo {
-	
+
 	@Id
 	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer userId;
-	
+
 	@Column(name = "display_name")
 	private String displayName;
-	
+
 	@Column(name = "email")
 	private String email;
-	
+
 	@Column(name = "password")
 	private String password;
-	
+
 	@Column(name = "created")
 	private Timestamp created;
-	
+
 	@Column(name = "deleted")
 	private Timestamp deleted;
-	
+
 	@Column(name = "grants")
 	private Integer grants;
-	
+
 	@Column(name = "confirmed")
 	private Boolean confirmed;
-	
+
 	@Column(name = "locked")
 	private Boolean locked;
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserInfo other = (UserInfo) obj;
+		if (userId == null) {
+			if (other.userId != null)
+				return false;
+		} else if (!userId.equals(other.userId))
+			return false;
+		return true;
+	}
+
 }

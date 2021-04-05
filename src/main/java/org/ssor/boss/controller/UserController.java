@@ -1,4 +1,4 @@
-package org.ssor.boss.user.controller;
+package org.ssor.boss.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.ssor.boss.user.dto.CreateUserInputDTO;
-import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserAlreadyExistsException;
-import org.ssor.boss.user.service.UserService;
+import org.ssor.boss.exception.UserAlreadyExistsException;
+import org.ssor.boss.dto.CreateUserInputDTO;
+import org.ssor.boss.dto.CreateUserResultDTO;
+import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.service.UserService;
 
 import java.time.LocalDateTime;
 

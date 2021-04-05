@@ -1,10 +1,9 @@
-package org.ssor.boss.user.repository;
+package org.ssor.boss.repository;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.entity.UserEntity;
 
 import java.time.LocalDateTime;
 

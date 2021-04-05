@@ -1,4 +1,4 @@
-package org.ssor.boss.user.service;
+package org.ssor.boss.service;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.AfterEach;
@@ -8,11 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ssor.boss.user.dto.CreateUserInputDTO;
-import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserAlreadyExistsException;
-import org.ssor.boss.user.repository.UserRepository;
+import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.exception.UserAlreadyExistsException;
+import org.ssor.boss.repository.UserRepository;
+import org.ssor.boss.dto.CreateUserInputDTO;
+import org.ssor.boss.dto.CreateUserResultDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

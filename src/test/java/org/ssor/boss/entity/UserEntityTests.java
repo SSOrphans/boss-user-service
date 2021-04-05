@@ -1,4 +1,4 @@
-package org.ssor.boss.user.entity;
+package org.ssor.boss.entity;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package org.ssor.boss.user.dto;
+package org.ssor.boss.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

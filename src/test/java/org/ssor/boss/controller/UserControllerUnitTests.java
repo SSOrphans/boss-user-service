@@ -1,11 +1,11 @@
-package org.ssor.boss.user.controller;
+package org.ssor.boss.controller;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ssor.boss.user.service.UserService;
+import org.ssor.boss.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerUnitTests

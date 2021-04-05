@@ -1,4 +1,4 @@
-package org.ssor.boss.user;
+package org.ssor.boss;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

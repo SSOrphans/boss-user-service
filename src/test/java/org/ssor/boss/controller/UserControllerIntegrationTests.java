@@ -1,4 +1,4 @@
-package org.ssor.boss.user.controller;
+package org.ssor.boss.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,11 +13,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.ssor.boss.user.dto.CreateUserInputDTO;
-import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserAlreadyExistsException;
-import org.ssor.boss.user.service.UserService;
+import org.ssor.boss.dto.CreateUserInputDTO;
+import org.ssor.boss.dto.CreateUserResultDTO;
+import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.exception.UserAlreadyExistsException;
+import org.ssor.boss.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

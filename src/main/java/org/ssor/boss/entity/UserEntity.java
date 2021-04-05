@@ -1,4 +1,4 @@
-package org.ssor.boss.user.entity;
+package org.ssor.boss.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

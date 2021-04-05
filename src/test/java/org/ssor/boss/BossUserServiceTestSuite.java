@@ -1,4 +1,4 @@
-package org.ssor.boss.user;
+package org.ssor.boss;
 
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.SelectPackages;

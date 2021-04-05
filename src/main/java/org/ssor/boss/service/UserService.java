@@ -1,12 +1,12 @@
-package org.ssor.boss.user.service;
+package org.ssor.boss.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.ssor.boss.user.dto.CreateUserInputDTO;
-import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserAlreadyExistsException;
-import org.ssor.boss.user.repository.UserRepository;
+import org.ssor.boss.dto.CreateUserInputDTO;
+import org.ssor.boss.dto.CreateUserResultDTO;
+import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.exception.UserAlreadyExistsException;
+import org.ssor.boss.repository.UserRepository;
 
 import java.time.LocalDateTime;
 

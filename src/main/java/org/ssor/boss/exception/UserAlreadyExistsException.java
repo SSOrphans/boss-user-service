@@ -1,4 +1,4 @@
-package org.ssor.boss.user.exception;
+package org.ssor.boss.exception;
 
 public class UserAlreadyExistsException extends RuntimeException
 {

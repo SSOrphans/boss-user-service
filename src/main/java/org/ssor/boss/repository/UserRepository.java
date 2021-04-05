@@ -1,8 +1,8 @@
-package org.ssor.boss.user.repository;
+package org.ssor.boss.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer>
 {

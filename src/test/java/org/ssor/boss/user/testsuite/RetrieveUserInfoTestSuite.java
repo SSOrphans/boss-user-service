@@ -12,9 +12,8 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(JUnitPlatform.class)
-@SelectPackages({ "org.ssor.boss.user.retrieveInfo.controller", "org.ssor.boss.user.retrieveInfo.dto",
-		"org.ssor.boss.user.retrieveInfo.entity", "org.ssor.boss.user.retrieveInfo.dao",
-		"org.ssor.boss.user.retrieveInfo.service" })
+@SelectPackages({ "org.ssor.boss.user.controller", "org.ssor.boss.user.repository",
+		"org.ssor.boss.user.service", "org.ssor.boss.user.exception" })
 public class RetrieveUserInfoTestSuite {
 
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ssor.boss.user.retrieveInfo.controller;
+package org.ssor.boss.user.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -18,8 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.ssor.boss.user.retrieveInfo.dto.UserInfoDto;
-import org.ssor.boss.user.retrieveInfo.service.UserInfoService;
+import org.ssor.boss.user.dto.UserInfoDto;
+import org.ssor.boss.user.service.UserInfoService;
 
 /**
  * @author Christian Angeles
@@ -32,13 +32,13 @@ import org.ssor.boss.user.retrieveInfo.service.UserInfoService;
 public class UserInfoControllerIntegrationTest {
 
 	@Autowired
-	private MockMvc mvc;
+	MockMvc mvc;
 
 	@Autowired
-	private JacksonTester<UserInfoDto> jsonUserInfoDto;
+	JacksonTester<UserInfoDto> jsonUserInfoDto;
 
 	@Autowired
-	private UserInfoService userInfoService;
+	UserInfoService userInfoService;
 
 	private UserInfoDto userInfoDto;
 

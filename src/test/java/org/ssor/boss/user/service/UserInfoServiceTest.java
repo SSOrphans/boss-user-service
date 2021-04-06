@@ -1,21 +1,21 @@
 /**
  * 
  */
-package org.ssor.boss.user.retrieveInfo.service;
+package org.ssor.boss.user.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.when;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.ssor.boss.user.retrieveInfo.dao.UserInfoDao;
-import org.ssor.boss.user.retrieveInfo.dto.UserInfoDto;
-import org.ssor.boss.user.retrieveInfo.entity.UserInfo;
+import org.ssor.boss.user.dto.UserInfoDto;
+import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,32 +38,32 @@ public class UserInfoServiceTest {
 	}
 
 	@Autowired
-	private UserInfoService userInfoService;
+	UserInfoService userInfoService;
 
 	@MockBean
-	private UserInfoDao userInfoDao;
+	UserRepository userInfoDao;
 
-	private static UserInfo userInfo;
+	private static UserEntity userEntity;
 	private static UserInfoDto userInfoDto;
 
 	@BeforeAll
 	public static void setUserInfo() {
-		userInfo = UserInfo.builder().userId(1).displayName("Joe Smith").email("joesmith@ss.com")
-				.created(new Timestamp(2077 - 01 - 01)).deleted(null).confirmed(true).locked(false).build();
+		userEntity = UserEntity.builder().id(1).displayName("Joe Smith").email("joesmith@ss.com")
+				.created(LocalDateTime.now()).deleted(null).confirmed(true).build();
 
 		userInfoDto = UserInfoDto.builder().userId(1).displayName("Joe Smith").email("joesmith@ss.com")
-				.created(new Timestamp(2077 - 01 - 01)).build();
+				.created(LocalDateTime.now()).build();
 	}
 
 	@Test
 	public void findUserByIdEqualsTest() {
-		when(userInfoDao.findById(userInfo.getUserId())).thenReturn(Optional.of(userInfo));
-		assertEquals(userInfoDto, userInfoService.findUserById(userInfo.getUserId()));
+		when(userInfoDao.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+		assertEquals(userInfoDto, userInfoService.findUserById(userEntity.getId()));
 	}
 
 	@Test
 	public void findUserByIdNotEqualsTest() {
-		when(userInfoDao.findById(1)).thenReturn(Optional.of(new UserInfo()));
+		when(userInfoDao.findById(1)).thenReturn(Optional.of(new UserEntity()));
 		assertNotEquals(userInfoDto, userInfoService.findUserById(1));
 	}
 }

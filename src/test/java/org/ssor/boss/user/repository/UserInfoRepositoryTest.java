@@ -1,11 +1,13 @@
 /**
  * 
  */
-package org.ssor.boss.user.retrieveInfo.dao;
+package org.ssor.boss.user.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.jdbc.Sql;
-import org.ssor.boss.user.retrieveInfo.entity.UserInfo;
+import org.ssor.boss.user.entity.UserEntity;
 
 /**
  * @author Christian Angeles
@@ -21,31 +23,31 @@ import org.ssor.boss.user.retrieveInfo.entity.UserInfo;
  */
 @DataJpaTest
 @Sql("classpath:data.sql")
-public class UserInfoDaoTest {
+public class UserInfoRepositoryTest {
 
 	@Autowired
-	UserInfoDao userInfoDao;
+	UserRepository userRepository;
 
-	private static UserInfo userInfo;
+	private static UserEntity userEntity;
 
 	@BeforeAll
 	public static void userInfoSetup() {
-		userInfo = UserInfo.builder().userId(1).displayName("Jane Smith").email("janesmith@ss.com").created(null)
-				.deleted(null).confirmed(true).locked(false).build();
+		userEntity = UserEntity.builder().id(1).displayName("Jane Smith").email("janesmith@ss.com").created(LocalDateTime.now())
+				.deleted(null).confirmed(true).build();
 	}
 
 	@Test
 	public void findByIdEqualTest() {
-		assertEquals(userInfo, userInfoDao.findById(1).orElse(null));
+		assertEquals(userEntity, userRepository.findById(1).orElse(null));
 	}
 
 	@Test
 	public void findByIdNotEqualTest() {
-		assertNotEquals(userInfo, userInfoDao.findById(2).orElse(null));
+		assertNotEquals(userEntity, userRepository.findById(2).orElse(null));
 	}
 
 	@Test
 	public void findByIdNullIdTest() {
-		assertThrows(InvalidDataAccessApiUsageException.class, () -> userInfoDao.findById(null));
+		assertThrows(InvalidDataAccessApiUsageException.class, () -> userRepository.findById(null));
 	}
 }

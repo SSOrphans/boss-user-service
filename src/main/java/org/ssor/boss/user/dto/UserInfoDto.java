@@ -1,9 +1,9 @@
 /**
  * 
  */
-package org.ssor.boss.user.retrieveInfo.dto;
+package org.ssor.boss.user.dto;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class UserInfoDto {
 	private Integer userId;
 	private String email;
 	private String displayName;
-	private Timestamp created;
+	private LocalDateTime created;
 
 	@Override
 	public int hashCode() {

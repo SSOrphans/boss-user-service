@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ssor.boss.user.updateprofile.dto;
+package org.ssor.boss.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UserProfileDto {
+public class UpdateUserDto {
 
 	@JsonProperty
 	private String displayName;

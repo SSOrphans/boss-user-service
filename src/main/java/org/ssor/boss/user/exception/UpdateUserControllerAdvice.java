@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
-public class UpdateUserControllerHandler {
+public class UpdateUserControllerAdvice {
 
 	@ExceptionHandler(UpdateServiceException.class)
 	public ResponseEntity<String> updateServiceException(UpdateServiceException e) {

@@ -34,7 +34,7 @@ public class UpdateUserService {
 				if (userProfileDto.getPassword() != null && !userProfileDto.getPassword().isBlank())
 					userEntity.setPassword(userProfileDto.getPassword());
 				userRepository.save(userEntity);
-				return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Updated user profile.");
+				return ResponseEntity.status(HttpStatus.OK).body("Updated user profile.");
 			}
 			return ResponseEntity.status(HttpStatus.OK).body("User does not exist.");
 		} catch (DataAccessException daoEx) {

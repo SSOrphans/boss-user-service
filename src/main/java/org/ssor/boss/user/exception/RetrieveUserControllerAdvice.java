@@ -15,10 +15,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  *
  */
 @ControllerAdvice
-public class ControllerExceptionHandler {
+public class RetrieveUserControllerAdvice {
 
-	@ExceptionHandler(UserInfoServiceException.class)
-	public ResponseEntity<String> updateServiceException(UserInfoServiceException e) {
+	@ExceptionHandler(RetrieveUserServiceException.class)
+	public ResponseEntity<String> updateServiceException(RetrieveUserServiceException e) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(e.getMessage() + "Internal server error, please contact the administrator.");
 	}

@@ -6,9 +6,9 @@ package org.ssor.boss.user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.ssor.boss.user.dto.UserInfoDto;
+import org.ssor.boss.user.dto.RetrieveUserDto;
 import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserInfoServiceException;
+import org.ssor.boss.user.exception.RetrieveUserServiceException;
 import org.ssor.boss.user.repository.UserRepository;
 
 /**
@@ -17,16 +17,16 @@ import org.ssor.boss.user.repository.UserRepository;
  */
 
 @Service
-public class UserInfoService {
+public class RetrieveUserService {
 
 	@Autowired
 	UserRepository userRepository;
 
-	public UserInfoDto findUserById(Integer userId) {
+	public RetrieveUserDto findUserById(Integer userId) {
 		try {
 			UserEntity userEntity = userRepository.findById(userId).orElse(null);
 			if(userEntity != null) {
-				UserInfoDto userInfoDto = UserInfoDto.builder().userId(userEntity.getId())
+				RetrieveUserDto userInfoDto = RetrieveUserDto.builder().userId(userEntity.getId())
 						.displayName(userEntity.getDisplayName())
 						.email(userEntity.getEmail())
 						.created(userEntity.getCreated()).build();
@@ -34,7 +34,7 @@ public class UserInfoService {
 			}
 			return null;
 		} catch (DataAccessException daoEx) {
-			throw new UserInfoServiceException("There is an issue accessing data. ");
+			throw new RetrieveUserServiceException("There is an issue accessing data. ");
 		}
 	}
 }

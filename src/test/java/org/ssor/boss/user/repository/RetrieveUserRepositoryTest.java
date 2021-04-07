@@ -23,7 +23,7 @@ import org.ssor.boss.user.entity.UserEntity;
  */
 @DataJpaTest
 @Sql("classpath:data.sql")
-public class UserInfoRepositoryTest {
+public class RetrieveUserRepositoryTest {
 
 	@Autowired
 	UserRepository userRepository;

@@ -18,8 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.ssor.boss.user.dto.UserInfoDto;
-import org.ssor.boss.user.service.UserInfoService;
+import org.ssor.boss.user.dto.RetrieveUserDto;
+import org.ssor.boss.user.service.RetrieveUserService;
 
 /**
  * @author Christian Angeles
@@ -29,43 +29,43 @@ import org.ssor.boss.user.service.UserInfoService;
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 @Sql("classpath:data.sql")
-public class UserInfoControllerIntegrationTest {
+public class RetrieveUserControllerIntegrationTest {
 
 	@Autowired
 	MockMvc mvc;
 
 	@Autowired
-	JacksonTester<UserInfoDto> jsonUserInfoDto;
+	JacksonTester<RetrieveUserDto> jsonRetrieveUserDto;
 
 	@Autowired
-	UserInfoService userInfoService;
+	RetrieveUserService userInfoService;
 
-	private UserInfoDto userInfoDto;
+	private RetrieveUserDto retrieveUserDto;
 
 	@BeforeEach
 	public void setUserInfoDto() {
-		userInfoDto = userInfoService.findUserById(1);
+		retrieveUserDto = userInfoService.findUserById(1);
 	}
 
 	@Test
-	public void getUserByIdOkTest() throws Exception {
+	public void okTest() throws Exception {
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
-		assertEquals(jsonUserInfoDto.write(userInfoDto).getJson(), mockResponse.getContentAsString());
+		assertEquals(jsonRetrieveUserDto.write(retrieveUserDto).getJson(), mockResponse.getContentAsString());
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void getUserByIdBadRequestTest() throws Exception {
+	public void badRequestTest() throws Exception {
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/should_be_integer")).andReturn()
 				.getResponse();
-		assertNotEquals(jsonUserInfoDto.write(userInfoDto).getJson(), mockResponse.getContentAsString());
+		assertNotEquals(jsonRetrieveUserDto.write(retrieveUserDto).getJson(), mockResponse.getContentAsString());
 		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void getUserByIdNotFoundTest() throws Exception {
+	public void notFoundTest() throws Exception {
 		MockHttpServletResponse mockResponse = mvc.perform(get("/random_path")).andReturn().getResponse();
-		assertNotEquals(jsonUserInfoDto.write(userInfoDto).getJson(), mockResponse.getContentAsString());
+		assertNotEquals(jsonRetrieveUserDto.write(retrieveUserDto).getJson(), mockResponse.getContentAsString());
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
 }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UserInfoDto {
+public class RetrieveUserDto {
 
 	private Integer userId;
 	private String email;
@@ -39,7 +39,7 @@ public class UserInfoDto {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UserInfoDto other = (UserInfoDto) obj;
+		RetrieveUserDto other = (RetrieveUserDto) obj;
 		if (userId == null) {
 			if (other.userId != null)
 				return false;

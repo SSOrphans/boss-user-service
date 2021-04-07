@@ -13,7 +13,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.ssor.boss.user.dto.UserInfoDto;
+import org.ssor.boss.user.dto.RetrieveUserDto;
 import org.ssor.boss.user.entity.UserEntity;
 import org.ssor.boss.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,31 +27,31 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  *
  */
 @ExtendWith(SpringExtension.class)
-public class UserInfoServiceTest {
+public class RetrieveUserServiceTest {
 
 	@TestConfiguration
 	public static class UserInfoServiceContextConfig {
 		@Bean
-		public UserInfoService userInfoService() {
-			return new UserInfoService();
+		public RetrieveUserService userInfoService() {
+			return new RetrieveUserService();
 		}
 	}
 
 	@Autowired
-	UserInfoService userInfoService;
+	RetrieveUserService userInfoService;
 
 	@MockBean
 	UserRepository userInfoDao;
 
 	private static UserEntity userEntity;
-	private static UserInfoDto userInfoDto;
+	private static RetrieveUserDto userInfoDto;
 
 	@BeforeAll
 	public static void setUserInfo() {
 		userEntity = UserEntity.builder().id(1).displayName("Joe Smith").email("joesmith@ss.com")
 				.created(LocalDateTime.now()).deleted(null).confirmed(true).build();
 
-		userInfoDto = UserInfoDto.builder().userId(1).displayName("Joe Smith").email("joesmith@ss.com")
+		userInfoDto = RetrieveUserDto.builder().userId(1).displayName("Joe Smith").email("joesmith@ss.com")
 				.created(LocalDateTime.now()).build();
 	}
 

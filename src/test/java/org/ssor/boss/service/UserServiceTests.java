@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ssor.boss.entity.UserEntity;
 import org.ssor.boss.exception.UserAlreadyExistsException;
-import org.ssor.boss.repository.UserRepository;
+import org.ssor.boss.repository.UserEntityRepository;
 import org.ssor.boss.dto.CreateUserInputDTO;
 import org.ssor.boss.dto.CreateUserResultDTO;
 
@@ -31,7 +31,10 @@ import static org.mockito.Mockito.when;
 class UserServiceTests
 {
   @Mock
-  static UserRepository userRepository;
+  static UserConfirmationRepository userConfirmationRepository;
+  @Mock
+  static UserEntityRepository userEntityRepository;
+  static ArrayList<UserConfirmationEntity> confirmations;
   static ArrayList<UserEntity> users;
   static UserService userService;
 
@@ -43,7 +46,7 @@ class UserServiceTests
     var user3 = new UserEntity(3, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
     var user4 = new UserEntity(4, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
     users = Lists.newArrayList(user1, user2, user3, user4);
-    userService = new UserService(userRepository);
+    userService = new UserService(userConfirmationRepository, userEntityRepository);
     assertThat(userService).isNotNull();
   }
 
@@ -57,11 +60,11 @@ class UserServiceTests
   @Test
   void test_CanGetAllUsersFromRepository()
   {
-    when(userRepository.findAll()).thenReturn(users);
+    when(userEntityRepository.findAll()).thenReturn(users);
 
     final var retrieved = userService.getAllUsers();
     assertThat(retrieved).isEqualTo(users);
-    verify(userRepository).findAll();
+    verify(userEntityRepository).findAll();
   }
 
   @Test
@@ -75,11 +78,11 @@ class UserServiceTests
     doAnswer(invocation -> {
       users.add(returnedUser);
       return returnedUser;
-    }).when(userRepository).save(postUser);
+    }).when(userEntityRepository).save(postUser);
 
     final var captor = ArgumentCaptor.forClass(UserEntity.class);
     final var result = userService.createUser(input, createdAt);
-    verify(userRepository).save(captor.capture());
+    verify(userEntityRepository).save(captor.capture());
     assertThat(captor.getValue()).isEqualTo(postUser);
     assertThat(result).isEqualTo(output);
   }
@@ -90,8 +93,8 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.createUser(null, LocalDateTime.now()))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_DTO_MESSAGE);
-    verify(userRepository, never()).checkUserExists(any(), any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).checkUserExistsWithUsernameAndEmail(any(), any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -101,8 +104,8 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.createUser(input, null))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_LDT_MESSAGE);
-    verify(userRepository, never()).checkUserExists(any(), any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).checkUserExistsWithUsernameAndEmail(any(), any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -112,8 +115,8 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_USERNAME_MESSAGE);
-    verify(userRepository, never()).checkUserExists(any(), any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).checkUserExistsWithUsernameAndEmail(any(), any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -123,8 +126,8 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_EMAIL_MESSAGE);
-    verify(userRepository, never()).checkUserExists(any(), any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).checkUserExistsWithUsernameAndEmail(any(), any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -134,8 +137,8 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_PASSWORD_MESSAGE);
-    verify(userRepository, never()).checkUserExists(any(), any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).checkUserExistsWithUsernameAndEmail(any(), any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -144,23 +147,23 @@ class UserServiceTests
     final var input = new CreateUserInputDTO("username", "me@example.com", "password");
 
     // We're forcing the mock to return true so the code path gets executed.
-    doReturn(true).when(userRepository).checkUserExists(any(), any());
+    doReturn(true).when(userEntityRepository).checkUserExistsWithUsernameAndEmail(any(), any());
 
     assertThatThrownBy(() -> userService.createUser(input, LocalDateTime.now()))
       .isInstanceOf(UserAlreadyExistsException.class)
       .hasMessage(UserAlreadyExistsException.USER_TAKEN_MESSAGE);
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
   void test_CanFilterUserFromRepositoryWithValidRetrieval()
   {
     final var user = users.get(0);
-    doReturn(Optional.ofNullable(user)).when(userRepository).findById(1);
+    doReturn(Optional.ofNullable(user)).when(userEntityRepository).findById(1);
 
     final var retrieved = userService.getUserWithId(1);
     final var captor = ArgumentCaptor.forClass(Integer.class);
-    verify(userRepository).findById(captor.capture());
+    verify(userEntityRepository).findById(captor.capture());
     assertThat(captor.getValue()).isEqualTo(1);
     assertThat(retrieved).isEqualTo(user);
   }
@@ -168,12 +171,12 @@ class UserServiceTests
   @Test
   void test_CannotFilterUserFromRepositoryWithInvalidRetrieval()
   {
-    doReturn(Optional.ofNullable(null)).when(userRepository).findById(5);
+    doReturn(Optional.ofNullable(null)).when(userEntityRepository).findById(5);
 
     final var retrieved = userService.getUserWithId(5);
     final var captor = ArgumentCaptor.forClass(Integer.class);
-    verify(userRepository).findById(captor.capture());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository).findById(captor.capture());
+    verify(userEntityRepository, never()).save(any());
     assertThat(captor.getValue()).isEqualTo(5);
     assertThat(retrieved).isNull();
   }
@@ -184,23 +187,23 @@ class UserServiceTests
     assertThatThrownBy(() -> userService.updateUserWithId(1, null))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.NULL_DTO_MESSAGE);
-    verify(userRepository, never()).findById(any());
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).findById(any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
   void test_CanUpdateUserFromRepositoryThrowsIAEWithInvalidId()
   {
-    doReturn(Optional.ofNullable(null)).when(userRepository).findById(5);
+    doReturn(Optional.ofNullable(null)).when(userEntityRepository).findById(5);
 
     final var userDTO = new CreateUserInputDTO("monkey", "me@example.com", "newPassword");
     final var captor = ArgumentCaptor.forClass(Integer.class);
     assertThatThrownBy(() -> userService.updateUserWithId(5, userDTO))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(UserService.INVALID_USER_ID + 5);
-    verify(userRepository).findById(captor.capture());
+    verify(userEntityRepository).findById(captor.capture());
     assertThat(captor.getValue()).isEqualTo(5);
-    verify(userRepository, never()).save(any());
+    verify(userEntityRepository, never()).save(any());
   }
 
   @Test
@@ -212,11 +215,11 @@ class UserServiceTests
     updatedUser.setDisplayName(userDTO.getDisplayName());
     updatedUser.setEmail(userDTO.getEmail());
     updatedUser.setPassword(userDTO.getPassword());
-    doReturn(originalUser).when(userRepository).findById(1);
+    doReturn(originalUser).when(userEntityRepository).findById(1);
 
     final var captor = ArgumentCaptor.forClass(UserEntity.class);
     userService.updateUserWithId(1, userDTO);
-    verify(userRepository).save(captor.capture());
+    verify(userEntityRepository).save(captor.capture());
     assertThat(captor.getValue()).isEqualTo(updatedUser);
   }
 
@@ -230,10 +233,10 @@ class UserServiceTests
       final var arg1 = invocation.getArgument(0, Integer.class);
       users.remove(0);
       return null;
-    }).when(userRepository).deleteById(1);
+    }).when(userEntityRepository).deleteById(1);
 
     userService.deleteUserWithId(1);
     assertThat(users.get(0).getId()).isEqualTo(2);
-    verify(userRepository).deleteById(1);
+    verify(userEntityRepository).deleteById(1);
   }
 }

@@ -6,7 +6,7 @@ import org.ssor.boss.dto.CreateUserInputDTO;
 import org.ssor.boss.dto.CreateUserResultDTO;
 import org.ssor.boss.entity.UserEntity;
 import org.ssor.boss.exception.UserAlreadyExistsException;
-import org.ssor.boss.repository.UserRepository;
+import org.ssor.boss.repository.UserEntityRepository;
 
 import java.time.LocalDateTime;
 
@@ -20,11 +20,11 @@ public class UserService
   public static final String NULL_EMAIL_MESSAGE = "User email must not be null";
   public static final String NULL_PASSWORD_MESSAGE = "User password must not be null";
   public static final String INVALID_USER_ID = "No such user with id: ";
-  private final UserRepository userRepository;
+  private final UserEntityRepository userEntityRepository;
 
   public Iterable<UserEntity> getAllUsers()
   {
-    return userRepository.findAll();
+    return userEntityRepository.findAll();
   }
 
   public CreateUserResultDTO createUser(CreateUserInputDTO createUserInputDTO, LocalDateTime created) throws
@@ -42,19 +42,22 @@ public class UserService
     if (createUserInputDTO.getPassword() == null)
       throw new IllegalArgumentException(NULL_PASSWORD_MESSAGE);
 
-    if (userRepository.checkUserExists(createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail()))
+    if (userEntityRepository
+      .checkUserExistsWithUsernameAndEmail(createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail()))
       throw new UserAlreadyExistsException();
 
     // Action.
     final var user = new UserEntity(null, createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail(),
                                     createUserInputDTO.getPassword(), created, null, false);
-    final var result = userRepository.save(user);
+    final var result = userEntityRepository.save(user);
+
+    // Create confirmation for User.
     return new CreateUserResultDTO(result.getId(), result.getDisplayName(), result.getEmail(), result.getCreated());
   }
 
   public UserEntity getUserWithId(final int id)
   {
-    final var result = userRepository.findById(id);
+    final var result = userEntityRepository.findById(id);
     if (result.isEmpty())
       return null;
     return result.get();
@@ -76,11 +79,11 @@ public class UserService
       user.setEmail(createUserInputDTO.getEmail());
     if (createUserInputDTO.getPassword() != null)
       user.setPassword(createUserInputDTO.getPassword());
-    userRepository.save(user);
+    userEntityRepository.save(user);
   }
 
   public void deleteUserWithId(final int id)
   {
-    userRepository.deleteById(1);
+    userEntityRepository.deleteById(1);
   }
 }

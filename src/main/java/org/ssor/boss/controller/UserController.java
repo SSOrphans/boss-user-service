@@ -14,6 +14,7 @@ import org.ssor.boss.dto.CreateUserResultDTO;
 import org.ssor.boss.entity.UserEntity;
 import org.ssor.boss.service.UserService;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -40,43 +41,9 @@ public class UserController
 
   @PostMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-  public ResponseEntity<Object>
-    addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
+  public ResponseEntity<CreateUserResultDTO> addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
   {
-    CreateUserResultDTO userResultDTO;
-    try
-    {
-      userResultDTO = userService.createUser(createUserInputDTO, LocalDateTime.now());
-    }
-    catch (IllegalArgumentException iae)
-    {
-      // Bad request.
-      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-    }
-    catch (UserAlreadyExistsException uaee)
-    {
-      return new ResponseEntity<>(uaee.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    return new ResponseEntity<>(userResultDTO, HttpStatus.CREATED);
+    final var result = userService.createUser(createUserInputDTO, LocalDateTime.now());
+    return ResponseEntity.status(HttpStatus.CREATED).body(result);
   }
-
-//  @GetMapping(value = "{user_id}")
-//  public UserEntity getUserWithId(@RequestParam(name = "user_id") Integer userId)
-//  {
-//    return userService.getUserWithId(userId);
-//  }
-//
-//  @PutMapping(value = "{user_id}")
-//  public void patchUserWithId(@RequestParam(name = "user_id") Integer userId, @RequestBody
-//    CreateUserInputDTO createUserInputDTO)
-//  {
-//    userService.updateUserWithId(userId, createUserInputDTO);
-//  }
-//
-//  @DeleteMapping(value = "{user_id}")
-//  public void deleteUserWithId(@RequestParam(name = "user_id") Integer userId)
-//  {
-//    userService.deleteUserWithId(userId);
-//  }
 }

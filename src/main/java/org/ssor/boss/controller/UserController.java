@@ -41,7 +41,7 @@ public class UserController
 
   @PostMapping(produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-  public ResponseEntity<CreateUserResultDTO> addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO)
+  public ResponseEntity<CreateUserResultDTO> addNewUser(@Valid @RequestBody CreateUserInputDTO createUserInputDTO)
   {
     final var result = userService.createUser(createUserInputDTO, LocalDateTime.now());
     return ResponseEntity.status(HttpStatus.CREATED).body(result);

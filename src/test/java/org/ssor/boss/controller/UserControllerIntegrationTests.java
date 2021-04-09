@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 class UserControllerIntegrationTests
 {
+  static final String FAKE_PASSWORD = "K$kXv9*KwRbA39C64!QfLJDzqgnZH@aeppSCXyzybL&6EpRYmQfv$UtPY-72uL9U";
+
   @Autowired
   MockMvc mockMvc;
 
@@ -49,10 +52,10 @@ class UserControllerIntegrationTests
   @BeforeEach
   void setup()
   {
-    var user1 = new UserEntity(1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user2 = new UserEntity(2, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user3 = new UserEntity(3, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user4 = new UserEntity(4, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
+    var user1 = new UserEntity(1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    var user2 = new UserEntity(2, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    var user3 = new UserEntity(3, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    var user4 = new UserEntity(4, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
     mapper.registerModule(new JavaTimeModule());
     users = Lists.newArrayList(user1, user2, user3, user4);
   }
@@ -81,7 +84,7 @@ class UserControllerIntegrationTests
   void test_CanAddNewUser() throws Exception
   {
     final var timeNow = LocalDateTime.now();
-    final var userDTO = new CreateUserInputDTO("monkey", "me.and.you@example.com", "mypassword");
+    final var userDTO = new CreateUserInputDTO("monkey", "me.and.you@example.com", FAKE_PASSWORD);
     final var resultDTO = new CreateUserResultDTO(5, "monkey", "me.and.you@example.com", timeNow);
     when(userService.createUser(eq(userDTO), any())).thenReturn(resultDTO);
 
@@ -100,7 +103,7 @@ class UserControllerIntegrationTests
   @Test
   void test_CannotAddNewUserBecauseUserExists() throws Exception
   {
-    final var userDTO = new CreateUserInputDTO("username", "me@example.com", "password");
+    final var userDTO = new CreateUserInputDTO("username", "me@example.com", FAKE_PASSWORD);
     when(userService.createUser(eq(userDTO), any())).thenThrow(UserAlreadyExistsException.class);
 
     mockMvc.perform(post("/api/v1/users")

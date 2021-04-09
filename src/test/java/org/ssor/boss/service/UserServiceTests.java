@@ -31,10 +31,7 @@ import static org.mockito.Mockito.when;
 class UserServiceTests
 {
   @Mock
-  static UserConfirmationRepository userConfirmationRepository;
-  @Mock
   static UserEntityRepository userEntityRepository;
-  static ArrayList<UserConfirmationEntity> confirmations;
   static ArrayList<UserEntity> users;
   static UserService userService;
 
@@ -46,7 +43,7 @@ class UserServiceTests
     var user3 = new UserEntity(3, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
     var user4 = new UserEntity(4, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
     users = Lists.newArrayList(user1, user2, user3, user4);
-    userService = new UserService(userConfirmationRepository, userEntityRepository);
+    userService = new UserService(userEntityRepository);
     assertThat(userService).isNotNull();
   }
 

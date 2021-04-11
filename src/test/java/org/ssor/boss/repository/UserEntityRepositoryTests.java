@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.entity.UserType;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +21,8 @@ class UserEntityRepositoryTests
   @BeforeEach
   void setup()
   {
-    final var user = new UserEntity(null, "monkey", "me@example.com", "password", LocalDateTime.now(), null, false);
+    final var user = new UserEntity(null, UserType.DEFAULT.ordinal(), 1, "monkey", "me@example.com", "password",
+                                    LocalDateTime.now(), null, false);
     userEntityRepository.save(user);
   }
 

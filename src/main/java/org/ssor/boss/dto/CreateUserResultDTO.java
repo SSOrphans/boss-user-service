@@ -1,7 +1,7 @@
 package org.ssor.boss.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,19 +9,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateUserResultDTO implements Serializable
 {
-  @JsonProperty(value = "id")
-  private int id;
-
-  @JsonProperty(value = "displayName")
+  private Integer id;
+  private Integer typeId;
+  private Integer branchId;
   private String displayName;
-
-  @JsonProperty(value = "email")
   private String email;
-
-  @JsonProperty(value = "created")
   private LocalDateTime created;
 }

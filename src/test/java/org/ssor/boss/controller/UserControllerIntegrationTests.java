@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.ssor.boss.dto.CreateUserInputDTO;
 import org.ssor.boss.dto.CreateUserResultDTO;
 import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.entity.UserType;
 import org.ssor.boss.exception.UserAlreadyExistsException;
 import org.ssor.boss.service.UserService;
 
@@ -37,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 class UserControllerIntegrationTests
 {
-  static final String FAKE_PASSWORD = "K$kXv9*KwRbA39C64!QfLJDzqgnZH@aeppSCXyzybL&6EpRYmQfv$UtPY-72uL9U";
+  static final String FAKE_PASSWORD = "b7aa75b24ace50c798eea4fe4ed0e36136032a438b43b0042b3ffe3a422d13ab";
 
   @Autowired
   MockMvc mockMvc;
@@ -52,10 +53,11 @@ class UserControllerIntegrationTests
   @BeforeEach
   void setup()
   {
-    var user1 = new UserEntity(1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
-    var user2 = new UserEntity(2, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
-    var user3 = new UserEntity(3, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
-    var user4 = new UserEntity(4, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    final var typeId = UserType.DEFAULT.ordinal();
+    final var user1 = new UserEntity(1, typeId, 1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    final var user2 = new UserEntity(2, typeId, 1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    final var user3 = new UserEntity(3, typeId, 1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
+    final var user4 = new UserEntity(4, typeId, 1, "username", "me@example.com", FAKE_PASSWORD, LocalDateTime.now(), null, true);
     mapper.registerModule(new JavaTimeModule());
     users = Lists.newArrayList(user1, user2, user3, user4);
   }
@@ -85,7 +87,7 @@ class UserControllerIntegrationTests
   {
     final var timeNow = LocalDateTime.now();
     final var userDTO = new CreateUserInputDTO("monkey", "me.and.you@example.com", FAKE_PASSWORD);
-    final var resultDTO = new CreateUserResultDTO(5, "monkey", "me.and.you@example.com", timeNow);
+    final var resultDTO = new CreateUserResultDTO(5, UserType.DEFAULT.ordinal(), 1, "monkey", "me.and.you@example.com", timeNow);
     when(userService.createUser(eq(userDTO), any())).thenReturn(resultDTO);
 
     final var returned = mockMvc.perform(post("/api/v1/users")

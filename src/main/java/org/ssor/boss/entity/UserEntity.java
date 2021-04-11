@@ -1,6 +1,7 @@
 package org.ssor.boss.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "user")
@@ -27,6 +29,10 @@ public class UserEntity implements Serializable
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
+  @Column(name = "type_id")
+  private Integer typeId;
+  @Column(name = "branch_id")
+  private Integer branchId;
   @Column(name = "display_name")
   private String displayName;
   private String email;
@@ -40,13 +46,13 @@ public class UserEntity implements Serializable
   {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    UserEntity user = (UserEntity) o;
-    return Objects.equals(id, user.id);
+    UserEntity that = (UserEntity) o;
+    return Objects.equals(id, that.id) && displayName.equals(that.displayName) && email.equals(that.email);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(id);
+    return Objects.hash(id, displayName, email);
   }
 }

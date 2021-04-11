@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.entity.UserType;
 import org.ssor.boss.exception.UserAlreadyExistsException;
 import org.ssor.boss.repository.UserEntityRepository;
 import org.ssor.boss.dto.CreateUserInputDTO;
@@ -38,10 +39,11 @@ class UserServiceTests
   @BeforeEach
   void setup()
   {
-    var user1 = new UserEntity(1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user2 = new UserEntity(2, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user3 = new UserEntity(3, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
-    var user4 = new UserEntity(4, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
+    final var typeId = UserType.DEFAULT.ordinal();
+    final var user1 = new UserEntity(1, typeId, 1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
+    final var user2 = new UserEntity(2, typeId, 1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
+    final var user3 = new UserEntity(3, typeId, 1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
+    final var user4 = new UserEntity(4, typeId, 1, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
     users = Lists.newArrayList(user1, user2, user3, user4);
     userService = new UserService(userEntityRepository);
     assertThat(userService).isNotNull();
@@ -69,9 +71,10 @@ class UserServiceTests
   {
     final var input = new CreateUserInputDTO("monkey", "me@example.com", "password");
     final var createdAt = LocalDateTime.now();
-    final var postUser = new UserEntity(null, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
-    final var returnedUser = new UserEntity(5, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
-    final var output = new CreateUserResultDTO(5, input.getDisplayName(), input.getEmail(), createdAt);
+    final var typeId = UserType.DEFAULT.ordinal();
+    final var postUser = new UserEntity(null, typeId, 1, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
+    final var returnedUser = new UserEntity(5, typeId, 1, input.getDisplayName(), input.getEmail(), input.getPassword(), createdAt, null, false);
+    final var output = new CreateUserResultDTO(5, typeId, 1, input.getDisplayName(), input.getEmail(), createdAt);
     doAnswer(invocation -> {
       users.add(returnedUser);
       return returnedUser;
@@ -156,26 +159,27 @@ class UserServiceTests
   void test_CanFilterUserFromRepositoryWithValidRetrieval()
   {
     final var user = users.get(0);
-    doReturn(Optional.ofNullable(user)).when(userEntityRepository).findById(1);
+    final var optionalUser = Optional.ofNullable(user);
+    doReturn(optionalUser).when(userEntityRepository).findById(1);
 
     final var retrieved = userService.getUserWithId(1);
     final var captor = ArgumentCaptor.forClass(Integer.class);
     verify(userEntityRepository).findById(captor.capture());
     assertThat(captor.getValue()).isEqualTo(1);
-    assertThat(retrieved).isEqualTo(user);
+    assertThat(retrieved).isEqualTo(optionalUser);
   }
 
   @Test
   void test_CannotFilterUserFromRepositoryWithInvalidRetrieval()
   {
-    doReturn(Optional.ofNullable(null)).when(userEntityRepository).findById(5);
+    doReturn(Optional.empty()).when(userEntityRepository).findById(5);
 
     final var retrieved = userService.getUserWithId(5);
     final var captor = ArgumentCaptor.forClass(Integer.class);
     verify(userEntityRepository).findById(captor.capture());
     verify(userEntityRepository, never()).save(any());
     assertThat(captor.getValue()).isEqualTo(5);
-    assertThat(retrieved).isNull();
+    assertThat(retrieved).isEqualTo(Optional.empty());
   }
 
   @Test
@@ -191,7 +195,7 @@ class UserServiceTests
   @Test
   void test_CanUpdateUserFromRepositoryThrowsIAEWithInvalidId()
   {
-    doReturn(Optional.ofNullable(null)).when(userEntityRepository).findById(5);
+    doReturn(Optional.empty()).when(userEntityRepository).findById(5);
 
     final var userDTO = new CreateUserInputDTO("monkey", "me@example.com", "newPassword");
     final var captor = ArgumentCaptor.forClass(Integer.class);

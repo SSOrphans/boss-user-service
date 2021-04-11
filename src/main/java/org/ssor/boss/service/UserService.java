@@ -1,15 +1,21 @@
 package org.ssor.boss.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.dto.CreateUserInputDTO;
 import org.ssor.boss.dto.CreateUserResultDTO;
 import org.ssor.boss.entity.UserEntity;
+import org.ssor.boss.entity.UserType;
 import org.ssor.boss.exception.UserAlreadyExistsException;
 import org.ssor.boss.repository.UserEntityRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService
@@ -28,39 +34,46 @@ public class UserService
   }
 
   public CreateUserResultDTO createUser(CreateUserInputDTO createUserInputDTO, LocalDateTime created) throws
-    IllegalArgumentException
+    IllegalArgumentException, UserAlreadyExistsException
   {
     // Forward contract.
     if (createUserInputDTO == null)
       throw new IllegalArgumentException(NULL_DTO_MESSAGE);
     if (created == null)
       throw new IllegalArgumentException(NULL_LDT_MESSAGE);
-    if (createUserInputDTO.getDisplayName() == null)
+
+    final var username = createUserInputDTO.getDisplayName();
+    final var email = createUserInputDTO.getEmail();
+    final var password = createUserInputDTO.getPassword();
+    if (username == null)
       throw new IllegalArgumentException(NULL_USERNAME_MESSAGE);
-    if (createUserInputDTO.getEmail() == null)
+    if (email == null)
       throw new IllegalArgumentException(NULL_EMAIL_MESSAGE);
-    if (createUserInputDTO.getPassword() == null)
+    if (password == null)
       throw new IllegalArgumentException(NULL_PASSWORD_MESSAGE);
 
-    if (userEntityRepository
-      .checkUserExistsWithUsernameAndEmail(createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail()))
+    if (userEntityRepository.checkUserExistsWithUsernameAndEmail(username, email))
       throw new UserAlreadyExistsException();
 
     // Action.
-    final var user = new UserEntity(null, createUserInputDTO.getDisplayName(), createUserInputDTO.getEmail(),
-                                    createUserInputDTO.getPassword(), created, null, false);
+    final var typeId = UserType.DEFAULT.ordinal();
+    final var user = new UserEntity(null, typeId, 1, username, email, password, created, null, false);
     final var result = userEntityRepository.save(user);
 
     // Create confirmation for User.
-    return new CreateUserResultDTO(result.getId(), result.getDisplayName(), result.getEmail(), result.getCreated());
+    return CreateUserResultDTO.builder()
+                              .id(result.getId())
+                              .typeId(result.getTypeId())
+                              .branchId(result.getBranchId())
+                              .displayName(result.getDisplayName())
+                              .email(result.getEmail())
+                              .created(result.getCreated())
+                              .build();
   }
 
-  public UserEntity getUserWithId(final int id)
+  public Optional<UserEntity> getUserWithId(final int id)
   {
-    final var result = userEntityRepository.findById(id);
-    if (result.isEmpty())
-      return null;
-    return result.get();
+    return userEntityRepository.findById(id);
   }
 
   public void updateUserWithId(final int id, CreateUserInputDTO createUserInputDTO) throws
@@ -69,10 +82,11 @@ public class UserService
     if (createUserInputDTO == null)
       throw new IllegalArgumentException(NULL_DTO_MESSAGE);
 
-    final var user = getUserWithId(id);
-    if (user == null)
+    final var possibleUser = getUserWithId(id);
+    if (possibleUser.isEmpty())
       throw new IllegalArgumentException(INVALID_USER_ID + id);
 
+    final var user = possibleUser.get();
     if (createUserInputDTO.getDisplayName() != null)
       user.setDisplayName(createUserInputDTO.getDisplayName());
     if (createUserInputDTO.getEmail() != null)
@@ -84,6 +98,6 @@ public class UserService
 
   public void deleteUserWithId(final int id)
   {
-    userEntityRepository.deleteById(1);
+    userEntityRepository.deleteById(id);
   }
 }

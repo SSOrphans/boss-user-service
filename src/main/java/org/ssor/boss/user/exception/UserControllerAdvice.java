@@ -26,6 +26,12 @@ public class UserControllerAdvice {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(udaEx.getMessage() + "Internal server error, please contact the administrator.");
 	}
+	
+	@ExceptionHandler(ForgotPassTokenException.class)
+	public ResponseEntity<String> tokenException(ForgotPassTokenException fptEx) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(fptEx.getMessage() + "Internal server error, please contact the administrator.");
+	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<String> typeMismatchException() {

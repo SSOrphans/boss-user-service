@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.dto.UserForgotPasswordEmailDto;
-import org.ssor.boss.user.dto.UserForgotPasswordTokenDto;
+import org.ssor.boss.user.dto.ForgotPassEmailDto;
+import org.ssor.boss.user.dto.ForgotPassTokenDto;
 import org.ssor.boss.user.dto.UserInfoDto;
 import org.ssor.boss.user.dto.UserProfileDto;
 import org.ssor.boss.user.entity.UserEntity;
@@ -91,17 +91,17 @@ public class UserController {
 
 	@PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody UserForgotPasswordEmailDto userForgotPasswordEmailDto) {
+	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody ForgotPassEmailDto userForgotPasswordEmailDto) {
 		userService.sendPasswordReset(userForgotPasswordEmailDto);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
 	}
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> updatePassword(@Valid @RequestBody UserForgotPasswordTokenDto userForgotPasswordTokenDto) {
+	public ResponseEntity<String> updatePassword(@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
 		if(userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
 			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User password was not updated.");
 	}
 }

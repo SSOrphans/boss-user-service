@@ -7,15 +7,21 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.dto.UserForgotPasswordEmailDto;
-import org.ssor.boss.user.dto.UserForgotPasswordTokenDto;
+import org.ssor.boss.user.dto.ForgotPassEmailDto;
+import org.ssor.boss.user.dto.ForgotPassTokenDto;
 import org.ssor.boss.user.dto.UserInfoDto;
 import org.ssor.boss.user.dto.UserProfileDto;
 import org.ssor.boss.user.entity.UserEntity;
 import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.exception.UserDataAccessException;
+import org.ssor.boss.user.exception.ForgotPassTokenException;
 import org.ssor.boss.user.repository.UserRepository;
-import org.ssor.boss.user.security.ForgotPasswordToken;
+import org.ssor.boss.user.security.JwtForgotPassToken;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -33,7 +39,7 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	@Autowired
-	ForgotPasswordToken forgotPasswordToken;
+	JwtForgotPassToken jwtForgotPassToken;
 
 	public Iterable<UserEntity> getAllUsers() {
 		return userRepository.findAll();
@@ -148,13 +154,12 @@ public class UserService {
 		}
 	}
 
-	public void sendPasswordReset(UserForgotPasswordEmailDto userForgotPasswordDto) {
+	public void sendPasswordReset(ForgotPassEmailDto forgotPassEmailDto) {
 		try {
-			if (userRepository.checkUserEmail(userForgotPasswordDto.getEmail())) {
+			if (userRepository.checkUserEmail(forgotPassEmailDto.getEmail())) {
 				// generate token
-				String token = forgotPasswordToken.generateAccessToken(userForgotPasswordDto.getEmail());
-				System.out.println("\n" + token);
-				// TODO: send password reset url to email
+				String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail());
+				// TODO: send password reset to email with AWS SNS
 			}
 		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
 			// TODO: log exception
@@ -162,23 +167,27 @@ public class UserService {
 		}
 	}
 
-	public Optional<UserForgotPasswordTokenDto> updateForgotPassword(UserForgotPasswordTokenDto userForgotPasswordTokenDto) {
+	public Optional<ForgotPassTokenDto> updateForgotPassword(ForgotPassTokenDto forgotPassTokenDto) {
 		try {
-			if (forgotPasswordToken.validate(userForgotPasswordTokenDto.getToken())) {
-				String email = forgotPasswordToken.getUserEmail(userForgotPasswordTokenDto.getToken());
-				Optional<UserEntity> userRepoEntity = userRepository.findUserByEmail(email);
+			if (jwtForgotPassToken.validate(forgotPassTokenDto.getToken())) {
+				String userEmail = jwtForgotPassToken.getUserEmail(forgotPassTokenDto.getToken());
+				Optional<UserEntity> userRepoEntity = userRepository.findUserByEmail(userEmail);
 				if (userRepoEntity.isPresent() && userRepoEntity.orElseThrow().getDeleted() == null) {
 					UserEntity userEntity = userRepoEntity.get();
-					if (userForgotPasswordTokenDto.getPassword() != null && !userForgotPasswordTokenDto.getPassword().isBlank())
-						userEntity.setPassword(userForgotPasswordTokenDto.getPassword());
-					userRepository.save(userEntity);
-					return Optional.ofNullable(userForgotPasswordTokenDto);
+					if (forgotPassTokenDto.getPassword() != null && !forgotPassTokenDto.getPassword().isBlank()) {
+						userEntity.setPassword(forgotPassTokenDto.getPassword());
+						userRepository.save(userEntity);
+						return Optional.ofNullable(forgotPassTokenDto);
+					}
 				}
 			}
 			return Optional.empty();
 		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
 			// TODO: log exception
 			throw new UserDataAccessException("There is an issue accessing data. ");
+		} catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException ex) {
+			// TODO: log exception
+			throw new ForgotPassTokenException("There is an issue validating the token. ");
 		}
 	}
 }

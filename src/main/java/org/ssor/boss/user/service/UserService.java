@@ -2,17 +2,20 @@ package org.ssor.boss.user.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.dto.UserEmailDto;
+import org.ssor.boss.user.dto.UserForgotPasswordEmailDto;
+import org.ssor.boss.user.dto.UserForgotPasswordTokenDto;
 import org.ssor.boss.user.dto.UserInfoDto;
 import org.ssor.boss.user.dto.UserProfileDto;
 import org.ssor.boss.user.entity.UserEntity;
 import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.exception.UserDataAccessException;
 import org.ssor.boss.user.repository.UserRepository;
+import org.ssor.boss.user.security.ForgotPasswordToken;
 
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -28,6 +31,9 @@ public class UserService {
 	public static final String NULL_PASSWORD_MESSAGE = "User password must not be null";
 	public static final String INVALID_USER_ID = "No such user with id: ";
 	private final UserRepository userRepository;
+
+	@Autowired
+	ForgotPasswordToken forgotPasswordToken;
 
 	public Iterable<UserEntity> getAllUsers() {
 		return userRepository.findAll();
@@ -142,15 +148,34 @@ public class UserService {
 		}
 	}
 
-	public void forgotPassEmail(UserEmailDto userEmailDto) {
+	public void sendPasswordReset(UserForgotPasswordEmailDto userForgotPasswordDto) {
 		try {
-			if (userRepository.checkUserEmail(userEmailDto.getEmail())) {
-				// TODO: send password reset link to email
-				System.out.println("\n send password reset link to email");
-			} else {
-				// test if not sent
-				System.out.println("\n do not send password reset link to email");
+			if (userRepository.checkUserEmail(userForgotPasswordDto.getEmail())) {
+				// generate token
+				String token = forgotPasswordToken.generateAccessToken(userForgotPasswordDto.getEmail());
+				System.out.println("\n" + token);
+				// TODO: send password reset url to email
 			}
+		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
+			// TODO: log exception
+			throw new UserDataAccessException("There is an issue accessing data. ");
+		}
+	}
+
+	public Optional<UserForgotPasswordTokenDto> updateForgotPassword(UserForgotPasswordTokenDto userForgotPasswordTokenDto) {
+		try {
+			if (forgotPasswordToken.validate(userForgotPasswordTokenDto.getToken())) {
+				String email = forgotPasswordToken.getUserEmail(userForgotPasswordTokenDto.getToken());
+				Optional<UserEntity> userRepoEntity = userRepository.findUserByEmail(email);
+				if (userRepoEntity.isPresent() && userRepoEntity.orElseThrow().getDeleted() == null) {
+					UserEntity userEntity = userRepoEntity.get();
+					if (userForgotPasswordTokenDto.getPassword() != null && !userForgotPasswordTokenDto.getPassword().isBlank())
+						userEntity.setPassword(userForgotPasswordTokenDto.getPassword());
+					userRepository.save(userEntity);
+					return Optional.ofNullable(userForgotPasswordTokenDto);
+				}
+			}
+			return Optional.empty();
 		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
 			// TODO: log exception
 			throw new UserDataAccessException("There is an issue accessing data. ");

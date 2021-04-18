@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.dto.UserEmailDto;
+import org.ssor.boss.user.dto.UserForgotPasswordEmailDto;
+import org.ssor.boss.user.dto.UserForgotPasswordTokenDto;
 import org.ssor.boss.user.dto.UserInfoDto;
 import org.ssor.boss.user.dto.UserProfileDto;
 import org.ssor.boss.user.entity.UserEntity;
@@ -30,8 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
 @RestController
-@RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE,
-		MediaType.APPLICATION_XML_VALUE })
+@RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 public class UserController {
 	public static final String USERS_ROUTE = "/api/v1/users";
 	private UserService userService;
@@ -61,7 +61,7 @@ public class UserController {
 		return new ResponseEntity<>(userResultDTO, HttpStatus.CREATED);
 	}
 
-	@GetMapping(path = USERS_ROUTE+"/{user_id}")
+	@GetMapping(path = USERS_ROUTE + "/{user_id}")
 	public ResponseEntity<Object> getUserById(@PathVariable("user_id") Integer userId) {
 		Optional<UserInfoDto> userInfoDto = userService.findUserById(userId);
 		if (userInfoDto.isPresent()) {
@@ -70,7 +70,7 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
 
-	@PutMapping(path = USERS_ROUTE+"/{user_id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
+	@PutMapping(path = USERS_ROUTE + "/{user_id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<String> updateUserProfile(@PathVariable("user_id") Integer userId,
 			@Valid @RequestBody UserProfileDto userDto) {
@@ -81,18 +81,27 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
 
-	@DeleteMapping(path = USERS_ROUTE+"/{user_id}")
+	@DeleteMapping(path = USERS_ROUTE + "/{user_id}")
 	public ResponseEntity<String> deleteUserAccount(@PathVariable("user_id") Integer userId) {
 		if (userService.deleteUserAccount(userId)) {
 			return ResponseEntity.status(HttpStatus.OK).body("User account deleted.");
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
-	
+
 	@PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody UserEmailDto userEmailDto){
-		userService.forgotPassEmail(userEmailDto);
+	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody UserForgotPasswordEmailDto userForgotPasswordEmailDto) {
+		userService.sendPasswordReset(userForgotPasswordEmailDto);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
+	}
+
+	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
+			MediaType.APPLICATION_XML_VALUE })
+	public ResponseEntity<String> updatePassword(@Valid @RequestBody UserForgotPasswordTokenDto userForgotPasswordTokenDto) {
+		if(userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
+			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
 }

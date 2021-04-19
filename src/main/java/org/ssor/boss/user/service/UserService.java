@@ -157,7 +157,7 @@ public class UserService {
 	}
 
 	public Boolean sendPasswordReset(ForgotPassEmailDto forgotPassEmailDto) {
-		if (userRepository.checkUserEmail(forgotPassEmailDto.getEmail()) && forgotPassEmailDto.getEmail() != null) {
+		if (forgotPassEmailDto.getEmail() != null && userRepository.checkUserEmail(forgotPassEmailDto.getEmail())) {
 			// generate token
 			String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail());
 			// TODO: send password reset to email with AWS SNS

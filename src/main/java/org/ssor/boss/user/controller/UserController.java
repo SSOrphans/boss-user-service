@@ -98,7 +98,7 @@ public class UserController {
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> updatePassword(@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
+	public ResponseEntity<String> updateForgotPassword(@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
 		if(userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
 			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
 		}

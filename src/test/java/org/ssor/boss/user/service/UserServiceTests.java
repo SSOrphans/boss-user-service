@@ -9,15 +9,29 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.ssor.boss.user.dto.CreateUserInputDTO;
 import org.ssor.boss.user.dto.CreateUserResultDTO;
+import org.ssor.boss.user.dto.ForgotPassEmailDto;
+import org.ssor.boss.user.dto.ForgotPassTokenDto;
 import org.ssor.boss.user.dto.UserInfoDto;
 import org.ssor.boss.user.dto.UserProfileDto;
 import org.ssor.boss.user.entity.UserEntity;
+import org.ssor.boss.user.exception.ForgotPassTokenException;
 import org.ssor.boss.user.exception.UserAlreadyExistsException;
 import org.ssor.boss.user.exception.UserDataAccessException;
 import org.ssor.boss.user.repository.UserRepository;
+import org.ssor.boss.user.security.JwtForgotPassToken;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +41,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,16 +51,37 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class UserServiceTests {
-	@Mock
-	static UserRepository userRepository;
+
+	@MockBean
+	UserRepository userRepository;
+
+	@MockBean
+	JwtForgotPassToken jwtForgotPassToken;
+
+//	@Mock
+//	static UserRepository userRepository;
 	static ArrayList<UserEntity> users;
-	static UserService userService;
+//	static UserService userService;
+
+	@TestConfiguration
+	public static class UserServiceTestContextConfig {
+		@Bean
+		public UserService userService() {
+			return new UserService();
+		}
+	}
+
+	@Autowired
+	UserService userService;
 
 	private static UserEntity userEntity;
 	private static UserInfoDto userInfoDto;
 	private static UserProfileDto userProfileDto;
+	private static ForgotPassEmailDto forgotPassEmailDto;
+	private static ForgotPassTokenDto forgotPassTokenDto;
 
 	@BeforeEach
 	void setup() {
@@ -54,20 +90,28 @@ class UserServiceTests {
 		var user3 = new UserEntity(3, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
 		var user4 = new UserEntity(4, "username", "me@example.com", "password", LocalDateTime.now(), null, true);
 		users = Lists.newArrayList(user1, user2, user3, user4);
-		userService = new UserService(userRepository);
+//		userService = new UserService(userRepository);
 		assertThat(userService).isNotNull();
-		
+
 		userEntity = UserEntity.builder().id(1).displayName("Test").email("test@ss.com").password("1234")
 				.created(LocalDateTime.now()).deleted(null).confirmed(true).build();
 		userInfoDto = UserInfoDto.builder().userId(1).displayName("Test").email("test@ss.com")
 				.created(LocalDateTime.now()).build();
 		userProfileDto = UserProfileDto.builder().displayName("Test").email("test@ss.com").password("1234").build();
+		forgotPassEmailDto = new ForgotPassEmailDto();
+		forgotPassTokenDto = new ForgotPassTokenDto();
 	}
 
 	@AfterEach
 	void teardown() {
 		users = null;
-		userService = null;
+//		userService = null;
+
+		userEntity = null;
+		userInfoDto = null;
+		userProfileDto = null;
+		forgotPassEmailDto = null;
+		forgotPassTokenDto = null;
 	}
 
 	@Test
@@ -235,57 +279,6 @@ class UserServiceTests {
 	}
 
 	@Test
-	public void validIdFindUserTest() {
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.findUserById(userEntity.getId()).isPresent());
-		assertEquals(Optional.of(userInfoDto).get().getUserId(), userService.findUserById(userEntity.getId()).get().getUserId());
-	}
-
-	@Test
-	public void validIdUpdateUserTest() {
-		//update name, email, and password
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.updateUserProfile(userEntity.getId(), userProfileDto).isPresent());
-		assertEquals(Optional.of(userProfileDto), userService.updateUserProfile(userEntity.getId(), userProfileDto));
-		
-		//update name only
-		UserProfileDto userDtoNameOnly = UserProfileDto.builder().displayName("Test").build();
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoNameOnly).isPresent());
-		assertEquals(Optional.of(userDtoNameOnly), userService.updateUserProfile(userEntity.getId(), userDtoNameOnly));
-		
-		//update email only
-		UserProfileDto userDtoEmailOnly = UserProfileDto.builder().email("test@ss.com").build();
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoEmailOnly).isPresent());
-		assertEquals(Optional.of(userDtoEmailOnly), userService.updateUserProfile(userEntity.getId(), userDtoEmailOnly));
-		
-		//update password only
-		UserProfileDto userDtoPassOnly = UserProfileDto.builder().password("1234").build();
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoPassOnly).isPresent());
-		assertEquals(Optional.of(userDtoPassOnly), userService.updateUserProfile(userEntity.getId(), userDtoPassOnly));
-	}
-	
-	@Test
-	public void validIdDeleteUserTest() {
-		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
-
-		assertTrue(userService.deleteUserAccount(userEntity.getId()));
-	}
-
-	@Test
-	public void nullIdFindUserTest() {
-		assertTrue(userService.findUserById(null).isEmpty());
-		assertTrue(userService.updateUserProfile(null, userProfileDto).isEmpty());
-	}
-
-	@Test
 	public void dataAccessExceptionTest() {
 		when(userRepository.findById(null)).thenThrow(Mockito.mock(DataAccessException.class));
 		assertThrows(UserDataAccessException.class, () -> userService.findUserById(null));
@@ -307,5 +300,131 @@ class UserServiceTests {
 		assertThrows(UserDataAccessException.class, () -> userService.findUserById(null));
 		assertThrows(UserDataAccessException.class, () -> userService.updateUserProfile(null, null));
 		assertThrows(UserDataAccessException.class, () -> userService.deleteUserAccount(null));
+	}
+	
+	@Test
+	public void tokenValidationSignatureException() {
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(SignatureException.class));
+		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
+	}
+	
+	@Test
+	public void tokenValidationMalformedJwtException() {
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(MalformedJwtException.class));
+		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
+	}
+	
+	@Test
+	public void tokenValidationExpiredJwtException() {
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(ExpiredJwtException.class));
+		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
+	}
+	
+	@Test
+	public void tokenValidationUnsupportedJwtException() {
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(UnsupportedJwtException.class));
+		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
+	}
+
+	@Test
+	public void validIdFindUserTest() {
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+
+		assertTrue(userService.findUserById(userEntity.getId()).isPresent());
+		assertEquals(Optional.of(userInfoDto).get().getUserId(),
+				userService.findUserById(userEntity.getId()).get().getUserId());
+	}
+
+	@Test
+	public void validIdUpdateUserTest() {
+		// update name, email, and password
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+
+		assertTrue(userService.updateUserProfile(userEntity.getId(), userProfileDto).isPresent());
+		assertEquals(Optional.of(userProfileDto), userService.updateUserProfile(userEntity.getId(), userProfileDto));
+
+		// update name only
+		UserProfileDto userDtoNameOnly = UserProfileDto.builder().displayName("Test").build();
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+
+		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoNameOnly).isPresent());
+		assertEquals(Optional.of(userDtoNameOnly), userService.updateUserProfile(userEntity.getId(), userDtoNameOnly));
+
+		// update email only
+		UserProfileDto userDtoEmailOnly = UserProfileDto.builder().email("test@ss.com").build();
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+
+		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoEmailOnly).isPresent());
+		assertEquals(Optional.of(userDtoEmailOnly),
+				userService.updateUserProfile(userEntity.getId(), userDtoEmailOnly));
+
+		// update password only
+		UserProfileDto userDtoPassOnly = UserProfileDto.builder().password("1234").build();
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+
+		assertTrue(userService.updateUserProfile(userEntity.getId(), userDtoPassOnly).isPresent());
+		assertEquals(Optional.of(userDtoPassOnly), userService.updateUserProfile(userEntity.getId(), userDtoPassOnly));
+	}
+
+	@Test
+	public void deleteUserTest() {
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+		assertTrue(userService.deleteUserAccount(userEntity.getId()));
+
+		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.empty());
+		assertFalse(userService.deleteUserAccount(userEntity.getId()));
+	}
+
+	@Test
+	public void nullIdFindUserTest() {
+		assertTrue(userService.findUserById(null).isEmpty());
+		assertTrue(userService.updateUserProfile(null, userProfileDto).isEmpty());
+	}
+
+	@Test
+	public void sendPasswordResetTest() {
+		forgotPassEmailDto.setEmail("test@ss.com");
+		when(jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail())).thenReturn("someValidToken");
+
+		when(userRepository.checkUserEmail(forgotPassEmailDto.getEmail())).thenReturn(true);
+		assertTrue(userService.sendPasswordReset(forgotPassEmailDto));
+
+		when(userRepository.checkUserEmail(forgotPassEmailDto.getEmail())).thenReturn(false);
+		assertFalse(userService.sendPasswordReset(forgotPassEmailDto));
+	}
+
+	@Test
+	public void updateForgotPasswordTest() {
+		// valid token, password, and entity
+		forgotPassTokenDto.setToken("test@ss.com");
+		forgotPassTokenDto.setPassword("someValidPassword");
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenReturn(true);
+		when(jwtForgotPassToken.getUserEmail(forgotPassTokenDto.getToken())).thenReturn("test@ss.com");
+		when(userRepository.findUserByEmail("test@ss.com")).thenReturn(Optional.of(userEntity));
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.of(forgotPassTokenDto));
+
+		// null password
+		forgotPassTokenDto.setPassword(null);
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenReturn(true);
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.empty());
+
+		// empty password
+		forgotPassTokenDto.setPassword("");
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenReturn(true);
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.empty());
+
+		// invalid token
+		forgotPassTokenDto.setToken("test@ss.com");
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenReturn(false);
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.empty());
+
+		// empty entity
+		when(userRepository.findUserByEmail("test@ss.com")).thenReturn(Optional.empty());
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.empty());
+
+		// entity "delete" not null
+		userEntity.setDeleted(LocalDateTime.now());
+		when(userRepository.findUserByEmail("test@ss.com")).thenReturn(Optional.of(userEntity));
+		assertEquals(userService.updateForgotPassword(forgotPassTokenDto), Optional.empty());
 	}
 }

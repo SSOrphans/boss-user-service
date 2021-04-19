@@ -36,7 +36,9 @@ public class UserService {
 	public static final String NULL_EMAIL_MESSAGE = "User email must not be null";
 	public static final String NULL_PASSWORD_MESSAGE = "User password must not be null";
 	public static final String INVALID_USER_ID = "No such user with id: ";
-	private final UserRepository userRepository;
+	
+	@Autowired
+	UserRepository userRepository;
 
 	@Autowired
 	JwtForgotPassToken jwtForgotPassToken;
@@ -154,17 +156,14 @@ public class UserService {
 		}
 	}
 
-	public void sendPasswordReset(ForgotPassEmailDto forgotPassEmailDto) {
-		try {
-			if (userRepository.checkUserEmail(forgotPassEmailDto.getEmail())) {
-				// generate token
-				String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail());
-				// TODO: send password reset to email with AWS SNS
-			}
-		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
-			// TODO: log exception
-			throw new UserDataAccessException("There is an issue accessing data. ");
+	public Boolean sendPasswordReset(ForgotPassEmailDto forgotPassEmailDto) {
+		if (userRepository.checkUserEmail(forgotPassEmailDto.getEmail()) && forgotPassEmailDto.getEmail() != null) {
+			// generate token
+			String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail());
+			// TODO: send password reset to email with AWS SNS
+			return true;
 		}
+		return false;
 	}
 
 	public Optional<ForgotPassTokenDto> updateForgotPassword(ForgotPassTokenDto forgotPassTokenDto) {
@@ -182,9 +181,6 @@ public class UserService {
 				}
 			}
 			return Optional.empty();
-		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex) {
-			// TODO: log exception
-			throw new UserDataAccessException("There is an issue accessing data. ");
 		} catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException ex) {
 			// TODO: log exception
 			throw new ForgotPassTokenException("There is an issue validating the token. ");

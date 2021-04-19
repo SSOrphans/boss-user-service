@@ -181,7 +181,7 @@ public class UserService {
 				}
 			}
 			return Optional.empty();
-		} catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException ex) {
+		} catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
 			// TODO: log exception
 			throw new ForgotPassTokenException("There is an issue validating the token. ");
 		}

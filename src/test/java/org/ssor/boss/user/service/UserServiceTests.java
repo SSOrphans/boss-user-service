@@ -325,6 +325,12 @@ class UserServiceTests {
 		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(UnsupportedJwtException.class));
 		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
 	}
+	
+	@Test
+	public void tokenValidationIllegalArgumentException() {
+		when(jwtForgotPassToken.validate(forgotPassTokenDto.getToken())).thenThrow(Mockito.mock(IllegalArgumentException.class));
+		assertThrows(ForgotPassTokenException.class, () -> userService.updateForgotPassword(forgotPassTokenDto));
+	}
 
 	@Test
 	public void validIdFindUserTest() {

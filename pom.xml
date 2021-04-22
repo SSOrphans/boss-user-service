@@ -17,6 +17,5 @@
 	<modules>
 		<module>boss-core</module>
 		<module>boss-controller</module>
-		<module>boss-core-test</module>
 	</modules>
 </project>

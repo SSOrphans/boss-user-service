@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +30,6 @@ import javax.validation.Valid;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 
-@CrossOrigin
 @RestController
 @RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 public class UserController {
@@ -93,17 +91,15 @@ public class UserController {
 
 	@PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> forgotPasswordEmail(
-			@Valid @RequestBody ForgotPassEmailDto userForgotPasswordEmailDto) {
+	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody ForgotPassEmailDto userForgotPasswordEmailDto) {
 		userService.sendPasswordReset(userForgotPasswordEmailDto);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
 	}
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> updateForgotPassword(
-			@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
-		if (userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
+	public ResponseEntity<String> updateForgotPassword(@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
+		if(userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
 			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User password was not updated.");

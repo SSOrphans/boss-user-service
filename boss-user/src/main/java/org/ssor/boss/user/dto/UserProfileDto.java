@@ -12,14 +12,14 @@ import lombok.Setter;
 @Setter
 public class UserProfileDto {
 
-	@Pattern(regexp = "^(?=[a-zA-Z]+)[a-zA-Z0-9]*$", message = "Invalid username.")
+	@Pattern(regexp = "(^[a-zA-Z]{2,} [a-zA-Z]{2,}$)|(^[a-zA-Z]{2,} [a-zA-Z]{2,} [a-zA-Z]{2,}$)", message = "Invalid name.")
 	private String displayName;
 
 	@Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z]+\\.[a-zA-Z]{2,3}$", message = "Invalid email.")
 	private String email;
 
-	@Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*]).*$", message = "Invalid password.")
-	@Size(min = 8, max = 64, message = "Invalid password length.")
+	@Pattern(regexp = "^(([0-9]+[a-fA-F]+)|([a-fA-F]+[0-9]+))+[0-9a-fA-F]*$", message = "Invalid password hash.")
+	@Size(min = 64, max = 64, message = "Invalid password hash length.")
 	private String password;
 
 	@Override

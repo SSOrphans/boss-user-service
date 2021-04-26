@@ -16,6 +16,6 @@
 	<description>User microservice for the Bank of Smoothstack</description>
 	<modules>
 		<module>boss-core</module>
-		<module>boss-controller</module>
+		<module>boss-user</module>
 	</modules>
 </project>

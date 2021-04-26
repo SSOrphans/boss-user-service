@@ -1,0 +1,22 @@
+# Boss-Core Changelog
+
+All notable changes to the boss-core module are documented here.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2021-04-25
+
+### Added
+
+- CHANGELOG
+- User entity
+- User type
+- NoSuchUser exception
+- UserAlreadyExists exception
+- User repository
+- User service
+- Api request response transfer object
+- Register user input transfer object
+- Register user output transfer object
+- Secure user details transfer object
+- Update user input transfer object
+- tests for each added object

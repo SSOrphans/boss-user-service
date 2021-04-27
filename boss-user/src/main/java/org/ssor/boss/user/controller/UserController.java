@@ -12,15 +12,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.ssor.boss.user.dto.CreateUserInputDTO;
-import org.ssor.boss.user.dto.CreateUserResultDTO;
-import org.ssor.boss.user.dto.ForgotPassEmailDto;
-import org.ssor.boss.user.dto.ForgotPassTokenDto;
-import org.ssor.boss.user.dto.UserInfoDto;
-import org.ssor.boss.user.dto.UserProfileDto;
-import org.ssor.boss.user.entity.UserEntity;
-import org.ssor.boss.user.exception.UserAlreadyExistsException;
-import org.ssor.boss.user.service.UserService;
+import org.ssor.boss.core.entity.User;
+import org.ssor.boss.core.exception.UserAlreadyExistsException;
+import org.ssor.boss.core.service.UserService;
+import org.ssor.boss.core.transfer.RegisterUserInput;
+import org.ssor.boss.core.transfer.RegisterUserOutput;
+import org.ssor.boss.core.transfer.UpdateUserInput;
+import org.ssor.boss.user.dto.ForgotPassEmailInput;
+import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UserInfoOutput;
+import org.ssor.boss.user.service.ControllerService;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -34,6 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 @RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
 public class UserController {
 	public static final String USERS_ROUTE = "/api/v1/users";
+
 	private UserService userService;
 
 	@Autowired
@@ -41,16 +43,19 @@ public class UserController {
 		this.userService = userService;
 	}
 
+	@Autowired
+	ControllerService controllerService;
+
 	@GetMapping(value = USERS_ROUTE)
-	public Iterable<UserEntity> getAllUsers() {
-		return userService.getAllUsers();
+	public Iterable<User> getAllUsers() {
+		return userService.getAllUsersUnsecure();
 	}
 
 	@PostMapping(value = USERS_ROUTE, consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-	public ResponseEntity<Object> addNewUser(@RequestBody CreateUserInputDTO createUserInputDTO) {
-		CreateUserResultDTO userResultDTO;
+	public ResponseEntity<Object> addNewUser(@RequestBody RegisterUserInput registerUserInput) {
+		RegisterUserOutput registerUserOutput;
 		try {
-			userResultDTO = userService.createUser(createUserInputDTO, LocalDateTime.now());
+			registerUserOutput = userService.registerNewUser(registerUserInput, LocalDateTime.now());
 		} catch (IllegalArgumentException iae) {
 			// Bad request.
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -58,14 +63,14 @@ public class UserController {
 			return new ResponseEntity<>(uaee.getMessage(), HttpStatus.CONFLICT);
 		}
 
-		return new ResponseEntity<>(userResultDTO, HttpStatus.CREATED);
+		return new ResponseEntity<>(registerUserOutput, HttpStatus.CREATED);
 	}
 
 	@GetMapping(path = USERS_ROUTE + "/{user_id}")
-	public ResponseEntity<Object> getUserById(@PathVariable("user_id") Integer userId) {
-		Optional<UserInfoDto> userInfoDto = userService.findUserById(userId);
-		if (userInfoDto.isPresent()) {
-			return ResponseEntity.status(HttpStatus.OK).body(userInfoDto.get());
+	public ResponseEntity<Object> getUserInfo(@PathVariable("user_id") Integer userId) {
+		Optional<UserInfoOutput> userInfoOutput = controllerService.getUserInfo(userId);
+		if (userInfoOutput.isPresent()) {
+			return ResponseEntity.status(HttpStatus.OK).body(userInfoOutput.get());
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
@@ -73,9 +78,8 @@ public class UserController {
 	@PutMapping(path = USERS_ROUTE + "/{user_id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<String> updateUserProfile(@PathVariable("user_id") Integer userId,
-			@Valid @RequestBody UserProfileDto userDto) {
-		Optional<UserProfileDto> userProfileDto = userService.updateUserProfile(userId, userDto);
-		if (userProfileDto.isPresent()) {
+			@Valid @RequestBody UpdateUserInput updateUserInput) {
+		if (controllerService.updateUserProfile(userId, updateUserInput)) {
 			return ResponseEntity.status(HttpStatus.OK).body("User profile updated.");
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
@@ -83,7 +87,7 @@ public class UserController {
 
 	@DeleteMapping(path = USERS_ROUTE + "/{user_id}")
 	public ResponseEntity<String> deleteUserAccount(@PathVariable("user_id") Integer userId) {
-		if (userService.deleteUserAccount(userId)) {
+		if (controllerService.deleteUserAccount(userId)) {
 			return ResponseEntity.status(HttpStatus.OK).body("User account deleted.");
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
@@ -91,17 +95,19 @@ public class UserController {
 
 	@PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> forgotPasswordEmail(@Valid @RequestBody ForgotPassEmailDto userForgotPasswordEmailDto) {
-		userService.sendPasswordReset(userForgotPasswordEmailDto);
+	public ResponseEntity<String> forgotPasswordEmail(
+			@Valid @RequestBody ForgotPassEmailInput userForgotPasswordEmailDto) {
+		controllerService.sendPasswordReset(userForgotPasswordEmailDto);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
 	}
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
-	public ResponseEntity<String> updateForgotPassword(@Valid @RequestBody ForgotPassTokenDto userForgotPasswordTokenDto) {
-		if(userService.updateForgotPassword(userForgotPasswordTokenDto).isPresent()) {
+	public ResponseEntity<String> updateForgotPassword(
+			@Valid @RequestBody ForgotPassTokenInput userForgotPasswordTokenDto) {
+		if (controllerService.updateForgotPassword(userForgotPasswordTokenDto)) {
 			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User password was not updated.");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is was an issue updating the password.");
 	}
 }

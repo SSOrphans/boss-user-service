@@ -16,9 +16,8 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UserInfoDto {
-
-	private Integer userId;
+public class UserInfoOutput {
+	
 	private String email;
 	private String displayName;
 	private LocalDateTime created;

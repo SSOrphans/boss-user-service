@@ -36,7 +36,7 @@ public class ControllerService {
 			Optional<User> userEntity = userRepository.findById(userId);
 			if (userEntity.isPresent() && userEntity.orElseThrow().getDeleted() == null) {
 				UserInfoOutput userInfoDto = UserInfoOutput.builder()
-						.displayName(userEntity.map(user -> user.getUsername()).orElseThrow())
+						.username(userEntity.map(user -> user.getUsername()).orElseThrow())
 						.email(userEntity.map(user -> user.getEmail()).orElseThrow())
 						.created(userEntity.map(user -> user.getCreated()).orElseThrow()).build();
 				return Optional.ofNullable(userInfoDto);
@@ -82,24 +82,24 @@ public class ControllerService {
 		}
 	}
 
-	public boolean sendPasswordReset(ForgotPassEmailInput forgotPassEmailDto) {
-		if (userRepository.existsUserByEmail(forgotPassEmailDto.getEmail())) {
+	public boolean sendPasswordReset(ForgotPassEmailInput forgotPassEmailInput) {
+		if (userRepository.existsUserByEmail(forgotPassEmailInput.getEmail())) {
 			// generate token
-			String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailDto.getEmail());
+			String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailInput.getEmail());
 			// TODO: send password reset to email with AWS SNS
 			return true;
 		}
 		return false;
 	}
 
-	public boolean updateForgotPassword(ForgotPassTokenInput forgotPassTokenDto) {
+	public boolean updateForgotPassword(ForgotPassTokenInput forgotPassTokenInput) {
 		try {
-			if (jwtForgotPassToken.validate(forgotPassTokenDto.getToken())) {
-				String userEmail = jwtForgotPassToken.getUserEmail(forgotPassTokenDto.getToken());
+			if (jwtForgotPassToken.validate(forgotPassTokenInput.getToken())) {
+				String userEmail = jwtForgotPassToken.getUserEmail(forgotPassTokenInput.getToken());
 				Optional<User> userRepo = userRepository.getUserByEmail(userEmail);
 				if (userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null) {
 					User userEntity = userRepo.get();
-					userEntity.setPassword(forgotPassTokenDto.getPassword());
+					userEntity.setPassword(forgotPassTokenInput.getPassword());
 					userRepository.save(userEntity);
 					return true;
 				}

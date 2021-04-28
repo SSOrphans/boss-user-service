@@ -19,6 +19,6 @@ import lombok.Setter;
 public class UserInfoOutput {
 	
 	private String email;
-	private String displayName;
+	private String username;
 	private LocalDateTime created;
 }

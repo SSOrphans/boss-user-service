@@ -96,16 +96,16 @@ public class UserController {
 	@PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<String> forgotPasswordEmail(
-			@Valid @RequestBody ForgotPassEmailInput userForgotPasswordEmailDto) {
-		controllerService.sendPasswordReset(userForgotPasswordEmailDto);
+			@Valid @RequestBody ForgotPassEmailInput forgotPasswordEmailInput) {
+		controllerService.sendPasswordReset(forgotPasswordEmailInput);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
 	}
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<String> updateForgotPassword(
-			@Valid @RequestBody ForgotPassTokenInput userForgotPasswordTokenDto) {
-		if (controllerService.updateForgotPassword(userForgotPasswordTokenDto)) {
+			@Valid @RequestBody ForgotPassTokenInput forgotPasswordTokenInput) {
+		if (controllerService.updateForgotPassword(forgotPasswordTokenInput)) {
 			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is was an issue updating the password.");

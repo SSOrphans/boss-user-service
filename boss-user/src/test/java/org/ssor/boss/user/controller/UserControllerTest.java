@@ -1,225 +1,213 @@
-///**
-// * 
-// */
-//package org.ssor.boss.user.controller;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-//
-//import java.util.Optional;
-//
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.json.JacksonTester;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.MediaType;
-//import org.springframework.mock.web.MockHttpServletResponse;
-//import org.springframework.test.context.jdbc.Sql;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.ssor.boss.user.dto.ForgotPassEmailDto;
-//import org.ssor.boss.user.dto.ForgotPassTokenDto;
-//import org.ssor.boss.user.dto.UserInfoDto;
-//import org.ssor.boss.user.dto.UserProfileDto;
-//import org.ssor.boss.user.service.ControllerService;
-//
-///**
-// * @author Christian Angeles
-// *
-// */
-//@SpringBootTest
-//@AutoConfigureMockMvc
-//@AutoConfigureJsonTesters
-////@Sql(scripts = "classpath:data.sql")
-//public class UserControllerTest {
-//
-//	@Autowired
-//	MockMvc mvc;
-//
-//	@Autowired
-//	JacksonTester<UserProfileDto> jsonUserProfileDto;
-//
-//	@Autowired
-//	JacksonTester<UserInfoDto> jsonUserInfoDto;
-//
-//	@Autowired
-//	JacksonTester<ForgotPassEmailDto> jsonForgotPassEmailDto;
-//
-//	@Autowired
-//	JacksonTester<ForgotPassTokenDto> jsonForgotPassTokenDto;
-//
-//	@Autowired
-//	ControllerService controllerService;
-//
-//	private Optional<UserInfoDto> userInfoDto;
-//	private Optional<UserProfileDto> userProfileDto;
-//
-//	@Test
-//	public void getOkTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
-//		userInfoDto = controllerService.findUserById(1);
-//		
+/**
+ * 
+ */
+package org.ssor.boss.user.controller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.MockMvc;
+import org.ssor.boss.core.entity.User;
+import org.ssor.boss.core.service.UserService;
+import org.ssor.boss.core.transfer.RegisterUserInput;
+import org.ssor.boss.core.transfer.RegisterUserOutput;
+import org.ssor.boss.core.transfer.UpdateUserInput;
+import org.ssor.boss.user.dto.ForgotPassEmailInput;
+import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UserInfoOutput;
+import org.ssor.boss.user.service.ControllerService;
+
+/**
+ * @author Christian Angeles
+ *
+ */
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureJsonTesters
+public class UserControllerTest {
+
+	@Autowired
+	MockMvc mvc;
+
+	@Autowired
+	JacksonTester<UserInfoOutput> jsonUserInfoOutput;
+
+	@Autowired
+	JacksonTester<UpdateUserInput> jsonUpdateUserInput;
+
+	@Autowired
+	JacksonTester<ForgotPassEmailInput> jsonForgotPassEmailInput;
+
+	@Autowired
+	JacksonTester<ForgotPassTokenInput> jsonForgotPassTokenInput;
+
+	@Autowired
+	JacksonTester<RegisterUserInput> jsonRegisterUserInput;
+
+	@MockBean
+	UserService userService;
+
+	@MockBean
+	ControllerService controllerService;
+
+	private UserInfoOutput userInfoOutput;
+	private UpdateUserInput updateUserInput;
+
+	@BeforeEach
+	public void setup() {
+		userInfoOutput = UserInfoOutput.builder().username("Test").email("test@ss.com").created(LocalDateTime.now())
+				.build();
+
+		updateUserInput = UpdateUserInput.builder().userId(1).username("Test").email("test@ss.com").password("TEst!@34")
+				.build();
+	}
+
+	@Test
+	public void userInfoOkTest() throws Exception {
+		when(controllerService.getUserInfo(1)).thenReturn(Optional.of(userInfoOutput));
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void userInfoNotFoundTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/2")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void updateUserProfileOkTest() throws Exception {
+		when(controllerService.updateUserProfile(updateUserInput.getUserId(), updateUserInput)).thenReturn(true);
+		MockHttpServletResponse mockResponse = mvc
+				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+				.andReturn().getResponse();
+
+		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void updateUserProfileNotFoundTest() throws Exception {
+		when(controllerService.updateUserProfile(updateUserInput.getUserId(), updateUserInput)).thenReturn(false);
+		MockHttpServletResponse mockResponse = mvc
+				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+				.andReturn().getResponse();
+
+		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void methodNotAllowedTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.METHOD_NOT_ALLOWED.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void getBadRequestTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/not_int")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void getUriNotFoundTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(get("/randomness")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void putInvalidInputIntegerTypeTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(
+				put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111))
+				.andReturn().getResponse();
+
+		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void delUserAccountOkTest() throws Exception {
+		when(controllerService.deleteUserAccount(1)).thenReturn(true);
+		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/1")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void delUserAccountNotFoundTest() throws Exception {
+		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/1")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void getAllUserTest() throws Exception {
+		when(userService.getAllUsersUnsecure()).thenReturn(new ArrayList<User>());
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users")).andReturn().getResponse();
+
+		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void addNewUserTest() throws Exception {
+		RegisterUserInput registerUserInput = RegisterUserInput.builder().username("User1").email("user1@ss.com")
+				.password("USer!@34").build();
+		when(userService.registerNewUser(registerUserInput, LocalDateTime.now())).thenReturn(new RegisterUserOutput());
+		MockHttpServletResponse mockResponse = mvc
+				.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(jsonRegisterUserInput.write(registerUserInput).getJson()))
+				.andReturn().getResponse();
+
+		assertEquals(HttpStatus.CREATED.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void forgotPassEmailTest() throws Exception {
+		ForgotPassEmailInput forgotPassEmailInput = new ForgotPassEmailInput();
+		forgotPassEmailInput.setEmail("test@ss.com");
+		MockHttpServletResponse mockResponse = mvc
+				.perform(post("/api/v1/user/email").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(jsonForgotPassEmailInput.write(forgotPassEmailInput).getJson()))
+				.andReturn().getResponse();
+
+		assertEquals(HttpStatus.ACCEPTED.value(), mockResponse.getStatus());
+	}
+
+	@Test
+	public void updateForgotPassTest() throws Exception {
+		ForgotPassTokenInput forgotPassTokenInput = new ForgotPassTokenInput();
+		forgotPassTokenInput.setToken(
+				"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMUBzcy5jb20ifQ.xLWpq08dGG4rr_daYoczPQSWWMH-6QDbGHKLK7bKFoVSJap_j2EjsPn71N4VyllMQX4OAumW9z0RbCu7b2XBOA");
+		forgotPassTokenInput.setPassword("TEst!@34");
+		when(controllerService.updateForgotPassword(forgotPassTokenInput)).thenReturn(true);
+		MockHttpServletResponse mockResponse = mvc
+				.perform(put("/api/v1/user/password").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(jsonForgotPassTokenInput.write(forgotPassTokenInput).getJson()))
+				.andReturn().getResponse();
+
 //		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void getNotFoundTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/2")).andReturn().getResponse();
-//		userInfoDto = controllerService.findUserById(2);
-//		
-//		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putOkTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(
-//						put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-//								.content(jsonUserProfileDto
-//										.write(UserProfileDto.builder().displayName("Test Sample").build()).getJson()))
-//				.andReturn().getResponse();
-//		
-//		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putNotFoundTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(
-//						put("/api/v1/users/2").contentType(MediaType.APPLICATION_JSON_VALUE)
-//								.content(jsonUserProfileDto
-//										.write(UserProfileDto.builder().displayName("Test Sample").build()).getJson()))
-//				.andReturn().getResponse();
-//		
-//		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void methodNotAllowedTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users")).andReturn().getResponse();
-//		
-//		assertEquals(HttpStatus.METHOD_NOT_ALLOWED.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void getBadRequestTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/not_int")).andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putBadRequestTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(
-//						put("/api/v1/users/not_int").contentType(MediaType.APPLICATION_JSON_VALUE)
-//								.content(jsonUserProfileDto
-//										.write(UserProfileDto.builder().displayName("Test Sample").build()).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void getUriNotFoundTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(get("/randomness")).andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putInvalidNameInputTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).content(
-//						jsonUserProfileDto.write(UserProfileDto.builder().displayName("Sample").build()).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putInvalidEmailInputTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).content(
-//						jsonUserProfileDto.write(UserProfileDto.builder().email("sample@notvalid").build()).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putInvalidPasswordInputTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-//						.content(jsonUserProfileDto.write(UserProfileDto.builder()
-//								.password("03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846--").build())
-//								.getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putInvalidPasswordLengthInputTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).content(
-//						jsonUserProfileDto.write(UserProfileDto.builder().password("1a2b3c4").build()).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putInvalidInputIntegerTypeTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(
-//				put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111))
-//				.andReturn().getResponse();
-//		
-//		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void delUserAccountOkTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/3")).andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void delUserAccountNotFoundTest() throws Exception {
-//		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/2")).andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void postForgotPassEmailTest() throws Exception {
-//		ForgotPassEmailDto forgotPassEmailDto = new ForgotPassEmailDto();
-//		forgotPassEmailDto.setEmail("janesmith@ss.com");
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(post("/api/v1/user/email").contentType(MediaType.APPLICATION_JSON_VALUE)
-//						.content(jsonForgotPassEmailDto.write(forgotPassEmailDto).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.ACCEPTED.value(), mockResponse.getStatus());
-//	}
-//
-//	@Test
-//	public void putUpdateForgotPassTest() throws Exception {
-//		ForgotPassTokenDto forgotPassTokenDto = new ForgotPassTokenDto();
-//		forgotPassTokenDto.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYW1wbGVAc3MuY29tIn0.nJS1ANuzIHmhmWBJZNZUhOlgbaLMt-tHc5WYUgHlUH10ihKw4EJNzrcjJ9WKfoN8hGfzDehSaWihG2Hy7nvngw");
-//		forgotPassTokenDto.setPassword("D74FF0EE8DA3B9806B18C877DBF29BBDE50B5BD8E4DAD7A3A725000FEB82E8F1");
-//		MockHttpServletResponse mockResponse = mvc
-//				.perform(put("/api/v1/user/password").contentType(MediaType.APPLICATION_JSON_VALUE)
-//						.content(jsonForgotPassTokenDto.write(forgotPassTokenDto).getJson()))
-//				.andReturn().getResponse();
-//
-//		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
-//	}
-//}
+	}
+}

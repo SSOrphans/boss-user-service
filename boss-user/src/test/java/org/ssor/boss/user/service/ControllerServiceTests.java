@@ -25,7 +25,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -63,7 +63,7 @@ class ControllerServiceTests {
 
 	@BeforeEach
 	void setup() {
-		LocalDateTime time = LocalDateTime.now();
+		long time = Instant.now().toEpochMilli();
 		userEntity = User.builder().id(1).username("User1").email("user1@ss.com").password("USer!@34").created(time)
 				.deleted(null).build();
 		userInfoOutput = UserInfoOutput.builder().username("User1").email("user1@ss.com").created(time).build();
@@ -216,7 +216,7 @@ class ControllerServiceTests {
 		assertFalse(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// entity "delete" not null
-		userEntity.setDeleted(LocalDateTime.now());
+		userEntity.setDeleted(Instant.now().toEpochMilli());
 		when(userRepository.getUserByEmail("test@ss.com")).thenReturn(Optional.of(userEntity));
 		assertFalse(controllerService.updateForgotPassword(forgotPassTokenInput));
 	}

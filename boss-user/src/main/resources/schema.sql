@@ -6,8 +6,8 @@ create table if not exists boss.user (
    username VARCHAR(16) NOT NULL UNIQUE,
    email VARCHAR(128) NOT NULL UNIQUE,
    password CHAR(64) NOT NULL,
-   created DATETIME NOT NULL,
-   deleted DATETIME,
+   created BIGINT NOT NULL,
+   deleted BIGINT,
    enabled BIT NOT NULL,
    locked BIT NOT NULL,
    PRIMARY KEY (id)

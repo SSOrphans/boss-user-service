@@ -24,6 +24,7 @@ import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UserInfoOutput;
 import org.ssor.boss.user.service.ControllerService;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -57,7 +58,7 @@ public class UserController {
 	public ResponseEntity<Object> addNewUser(@RequestBody RegisterUserInput registerUserInput) {
 		RegisterUserOutput registerUserOutput;
 		try {
-			registerUserOutput = userService.registerNewUser(registerUserInput, LocalDateTime.now());
+			registerUserOutput = userService.registerNewUser(registerUserInput, Instant.now());
 		} catch (IllegalArgumentException iae) {
 			// Bad request.
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);

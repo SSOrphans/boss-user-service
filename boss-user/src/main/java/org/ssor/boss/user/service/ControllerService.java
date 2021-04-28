@@ -18,6 +18,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public class ControllerService {
 			Optional<User> userRepo = userRepository.findById(userId);
 			if (userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null) {
 				User userEntity = userRepo.orElseThrow();
-				userEntity.setDeleted(LocalDateTime.now());
+				userEntity.setDeleted(Instant.now().toEpochMilli());
 				userRepository.save(userEntity);
 				return true;
 			}

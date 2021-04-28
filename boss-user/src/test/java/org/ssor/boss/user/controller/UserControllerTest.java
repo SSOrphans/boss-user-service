@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -74,7 +74,7 @@ public class UserControllerTest {
 
 	@BeforeEach
 	public void setup() {
-		userInfoOutput = UserInfoOutput.builder().username("Test").email("test@ss.com").created(LocalDateTime.now())
+		userInfoOutput = UserInfoOutput.builder().username("Test").email("test@ss.com").created(Instant.now().toEpochMilli())
 				.build();
 
 		updateUserInput = UpdateUserInput.builder().userId(1).username("Test").email("test@ss.com").password("TEst!@34")
@@ -175,7 +175,7 @@ public class UserControllerTest {
 	public void addNewUserTest() throws Exception {
 		RegisterUserInput registerUserInput = RegisterUserInput.builder().username("User1").email("user1@ss.com")
 				.password("USer!@34").build();
-		when(userService.registerNewUser(registerUserInput, LocalDateTime.now())).thenReturn(new RegisterUserOutput());
+		when(userService.registerNewUser(registerUserInput, Instant.now())).thenReturn(new RegisterUserOutput());
 		MockHttpServletResponse mockResponse = mvc
 				.perform(post("/api/v1/users").contentType(MediaType.APPLICATION_JSON_VALUE)
 						.content(jsonRegisterUserInput.write(registerUserInput).getJson()))

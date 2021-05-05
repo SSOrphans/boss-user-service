@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../boss-eureka" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../boss-gateway" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../boss-gateway/boss-core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/boss-core" vcs="Git" />
+  </component>
+</project>

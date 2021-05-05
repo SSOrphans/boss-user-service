@@ -11,7 +11,10 @@ import org.junit.runner.RunWith;
                   "org.ssor.boss.user.entity",
                   "org.ssor.boss.user.repository",
                   "org.ssor.boss.user.security",
-                  "org.ssor.boss.user.service"
+                  "org.ssor.boss.user.service",
+                  "org.ssor.boss.core.configuration",
+                  "org.ssor.boss.core.entity",
+                  "org.ssor.boss.core.repository"
                 })
 public class BossUserServiceTestSuite
 {

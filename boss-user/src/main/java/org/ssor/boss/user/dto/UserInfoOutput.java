@@ -3,6 +3,8 @@
  */
 package org.ssor.boss.user.dto;
 
+import java.time.LocalDate;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,10 +15,16 @@ import lombok.Setter;
  */
 @Builder
 @Getter
-@Setter
 public class UserInfoOutput {
 	
 	private String email;
 	private String username;
-	private long created;
+	private LocalDate created;
+	private String fullName;
+	private LocalDate dob;
+	private String address;
+	private String city;
+	private String state;
+	private Integer zip;
+	private String phone;
 }

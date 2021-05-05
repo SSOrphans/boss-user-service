@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -43,7 +45,8 @@ import org.ssor.boss.user.service.ControllerService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
-public class UserControllerTest {
+public class UserControllerTest
+{
 
 	@Autowired
 	MockMvc mvc;
@@ -73,16 +76,20 @@ public class UserControllerTest {
 	private UpdateUserInput updateUserInput;
 
 	@BeforeEach
-	public void setup() {
-		userInfoOutput = UserInfoOutput.builder().username("Test").email("test@ss.com").created(Instant.now().toEpochMilli())
-				.build();
+	public void setup()
+	{
+		userInfoOutput = UserInfoOutput.builder().username("test").email("test@ss.com")
+				.created(LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault())).fullName("Test Sample")
+				.dob(LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault())).address("address").city("city").state("state")
+				.zip(12345).phone("1234567").build();
 
 		updateUserInput = UpdateUserInput.builder().userId(1).username("Test").email("test@ss.com").password("TEst!@34")
 				.build();
 	}
 
 	@Test
-	public void userInfoOkTest() throws Exception {
+	public void userInfoOkTest() throws Exception
+	{
 		when(controllerService.getUserInfo(1)).thenReturn(Optional.of(userInfoOutput));
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
 
@@ -90,66 +97,72 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void userInfoNotFoundTest() throws Exception {
+	public void userInfoNotFoundTest() throws Exception
+	{
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/2")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void updateUserProfileOkTest() throws Exception {
+	public void updateUserProfileOkTest() throws Exception
+	{
 		when(controllerService.updateUserProfile(updateUserInput.getUserId(), updateUserInput)).thenReturn(true);
-		MockHttpServletResponse mockResponse = mvc
-				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users/1")
+				.contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonUpdateUserInput.write(updateUserInput).getJson()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void updateUserProfileNotFoundTest() throws Exception {
+	public void updateUserProfileNotFoundTest() throws Exception
+	{
 		when(controllerService.updateUserProfile(updateUserInput.getUserId(), updateUserInput)).thenReturn(false);
-		MockHttpServletResponse mockResponse = mvc
-				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users/1")
+				.contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonUpdateUserInput.write(updateUserInput).getJson()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void methodNotAllowedTest() throws Exception {
+	public void methodNotAllowedTest() throws Exception
+	{
 		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.METHOD_NOT_ALLOWED.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void getBadRequestTest() throws Exception {
+	public void getBadRequestTest() throws Exception
+	{
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/not_int")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void getUriNotFoundTest() throws Exception {
+	public void getUriNotFoundTest() throws Exception
+	{
 		MockHttpServletResponse mockResponse = mvc.perform(get("/randomness")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void putInvalidInputIntegerTypeTest() throws Exception {
-		MockHttpServletResponse mockResponse = mvc.perform(
-				put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111))
+	public void putInvalidInputIntegerTypeTest() throws Exception
+	{
+		MockHttpServletResponse mockResponse = mvc
+				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void delUserAccountOkTest() throws Exception {
+	public void delUserAccountOkTest() throws Exception
+	{
 		when(controllerService.deleteUserAccount(1)).thenReturn(true);
 		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/1")).andReturn().getResponse();
 
@@ -157,14 +170,16 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void delUserAccountNotFoundTest() throws Exception {
+	public void delUserAccountNotFoundTest() throws Exception
+	{
 		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/1")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
 
 	@Test
-	public void getAllUserTest() throws Exception {
+	public void getAllUserTest() throws Exception
+	{
 		when(userService.getAllUsersUnsecure()).thenReturn(new ArrayList<User>());
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users")).andReturn().getResponse();
 
@@ -172,8 +187,9 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void addNewUserTest() throws Exception {
-		RegisterUserInput registerUserInput = RegisterUserInput.builder().username("User1").email("user1@ss.com")
+	public void addNewUserTest() throws Exception
+	{
+		RegisterUserInput registerUserInput = RegisterUserInput.builder().username("user1").email("user1@ss.com")
 				.password("USer!@34").build();
 		when(userService.registerNewUser(registerUserInput, Instant.now())).thenReturn(new RegisterUserOutput());
 		MockHttpServletResponse mockResponse = mvc
@@ -185,7 +201,8 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void forgotPassEmailTest() throws Exception {
+	public void forgotPassEmailTest() throws Exception
+	{
 		ForgotPassEmailInput forgotPassEmailInput = new ForgotPassEmailInput();
 		forgotPassEmailInput.setEmail("test@ss.com");
 		MockHttpServletResponse mockResponse = mvc
@@ -197,7 +214,8 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void updateForgotPassTest() throws Exception {
+	public void updateForgotPassTest() throws Exception
+	{
 		ForgotPassTokenInput forgotPassTokenInput = new ForgotPassTokenInput();
 		forgotPassTokenInput.setToken(
 				"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMUBzcy5jb20ifQ.xLWpq08dGG4rr_daYoczPQSWWMH-6QDbGHKLK7bKFoVSJap_j2EjsPn71N4VyllMQX4OAumW9z0RbCu7b2XBOA");

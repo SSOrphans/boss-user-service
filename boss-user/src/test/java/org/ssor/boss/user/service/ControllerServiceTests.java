@@ -16,9 +16,9 @@ import org.ssor.boss.core.exception.ForgotPassTokenException;
 import org.ssor.boss.core.exception.UserDataAccessException;
 import org.ssor.boss.core.repository.AccountHolderRepository;
 import org.ssor.boss.core.repository.UserRepository;
-import org.ssor.boss.core.transfer.UpdateUserInput;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UpdateProfileInput;
 import org.ssor.boss.user.dto.UserInfoOutput;
 import org.ssor.boss.user.security.JwtForgotPassToken;
 
@@ -68,7 +68,7 @@ class ControllerServiceTests
 	private User userEntity;
 	private AccountHolder userAccount;
 	private UserInfoOutput userInfoOutput;
-	private UpdateUserInput updateUserInput;
+	private UpdateProfileInput updateProfileInput;
 	private ForgotPassEmailInput forgotPassEmailInput;
 	private ForgotPassTokenInput forgotPassTokenInput;
 
@@ -84,7 +84,7 @@ class ControllerServiceTests
 		userInfoOutput = UserInfoOutput.builder().username("test").email("test@ss.com").created(date)
 				.fullName("Test Sample").dob(date).address("address").city("city").state("state").zip(12345).phone("1234567")
 				.build();
-		updateUserInput = UpdateUserInput.builder().username("test1").email("test1@ss.com").password("TEst!@34").build();
+		updateProfileInput = UpdateProfileInput.builder().email("test1@ss.com").build();
 		forgotPassEmailInput = new ForgotPassEmailInput();
 		forgotPassTokenInput = new ForgotPassTokenInput();
 	}
@@ -199,8 +199,9 @@ class ControllerServiceTests
 	public void updateUserTest()
 	{
 		when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+		when(accountHolderRepository.findById(userEntity.getId())).thenReturn(Optional.of(userAccount));
 
-		assertTrue(controllerService.updateUserProfile(userEntity.getId(), updateUserInput));
+		assertTrue(controllerService.updateUserProfile(userEntity.getId(), updateProfileInput));
 	}
 
 	@Test

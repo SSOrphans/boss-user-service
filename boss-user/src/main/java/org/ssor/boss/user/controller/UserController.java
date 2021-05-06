@@ -21,6 +21,7 @@ import org.ssor.boss.core.transfer.RegisterUserOutput;
 import org.ssor.boss.core.transfer.UpdateUserInput;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UpdateProfileInput;
 import org.ssor.boss.user.dto.UserInfoOutput;
 import org.ssor.boss.user.service.ControllerService;
 
@@ -80,17 +81,17 @@ public class UserController {
 	@PutMapping(path = USERS_ROUTE + "/{user_id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
 			MediaType.APPLICATION_XML_VALUE })
 	public ResponseEntity<String> updateUserProfile(@PathVariable("user_id") Integer userId,
-			@Valid @RequestBody UpdateUserInput updateUserInput) {
-		if (controllerService.updateUserProfile(userId, updateUserInput)) {
-			return ResponseEntity.status(HttpStatus.OK).body("User profile updated.");
+			@Valid @RequestBody UpdateProfileInput updateProfileInput) {
+		if (controllerService.updateUserProfile(userId, updateProfileInput)) {
+			return new ResponseEntity<>(null, HttpStatus.OK);
 		}
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
+		return new ResponseEntity<>("User does not exist.", HttpStatus.NOT_FOUND);
 	}
 
 	@DeleteMapping(path = USERS_ROUTE + "/{user_id}")
 	public ResponseEntity<String> deleteUserAccount(@PathVariable("user_id") Integer userId) {
 		if (controllerService.deleteUserAccount(userId)) {
-			return ResponseEntity.status(HttpStatus.OK).body("User account deleted.");
+			return new ResponseEntity<>(null, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
 	}
@@ -108,7 +109,7 @@ public class UserController {
 	public ResponseEntity<String> updateForgotPassword(
 			@Valid @RequestBody ForgotPassTokenInput forgotPasswordTokenInput) {
 		if (controllerService.updateForgotPassword(forgotPasswordTokenInput)) {
-			return ResponseEntity.status(HttpStatus.OK).body("User password updated.");
+			return new ResponseEntity<>(null, HttpStatus.OK);
 		}
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is was an issue updating the password.");
 	}

@@ -31,4 +31,4 @@ values (2, 1, 'user9', 'user9@ss.com', 'USer!@34', 0, NULL, true, false);
 
 --ACCOUNT HOLDER
 insert into boss.account_holder(user_id, full_name, dob, ssn, address, city, state, zip, phone)
-values(1, 'Trevor Philips', 20130917, '123-45-6789', '16703 Nicklaus Dr', 'Los Anglees', 'CA', 91342, '+12735550136');
+values(1, 'Trevor Philips', 20130917, '123-45-6789', '16703 Nicklaus Dr', 'Los Angeles', 'CA', 91342, '+12735550136');

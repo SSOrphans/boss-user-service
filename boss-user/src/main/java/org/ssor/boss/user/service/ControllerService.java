@@ -12,6 +12,7 @@ import org.ssor.boss.core.repository.UserRepository;
 import org.ssor.boss.core.transfer.UpdateUserInput;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UpdateProfileInput;
 import org.ssor.boss.user.dto.UserInfoOutput;
 import org.ssor.boss.user.security.JwtForgotPassToken;
 
@@ -58,8 +59,7 @@ public class ControllerService
 						.city(userAccount.map(user -> user.getCity()).orElseThrow())
 						.state(userAccount.map(user -> user.getState()).orElseThrow())
 						.zip(userAccount.map(user -> user.getZip()).orElseThrow())
-						.phone(userAccount.map(user -> user.getPhone()).orElseThrow())
-						.build();
+						.phone(userAccount.map(user -> user.getPhone()).orElseThrow()).build();
 				return Optional.ofNullable(userInfoDto);
 			}
 			return Optional.empty();
@@ -70,18 +70,27 @@ public class ControllerService
 		}
 	}
 
-	public boolean updateUserProfile(Integer userId, UpdateUserInput updateUserInput)
+	public boolean updateUserProfile(Integer userId, UpdateProfileInput updateProfileInput)
 	{
 		try
 		{
 			Optional<User> userRepo = userRepository.findById(userId);
-			if (userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null)
+			Optional<AccountHolder> accountRepo = accountHolderRepository.findById(userId);
+			if (accountRepo.isPresent() && userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null)
 			{
 				User userEntity = userRepo.get();
-				userEntity.setUsername(updateUserInput.getUsername());
-				userEntity.setEmail(updateUserInput.getEmail());
-				userEntity.setPassword(updateUserInput.getPassword());
+				AccountHolder accountHolder = accountRepo.get();
+
+				userEntity.setEmail(updateProfileInput.getEmail());
+				accountHolder.setFullName(updateProfileInput.getFullName());
+				accountHolder.setAddress(updateProfileInput.getAddress());
+				accountHolder.setCity(updateProfileInput.getCity());
+				accountHolder.setState(updateProfileInput.getState());
+				accountHolder.setZip(updateProfileInput.getZip());
+				accountHolder.setPhone(updateProfileInput.getPhone());
+
 				userRepository.save(userEntity);
+				accountHolderRepository.save(accountHolder);
 				return true;
 			}
 			return false;

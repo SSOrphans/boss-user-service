@@ -32,13 +32,14 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_XML_VALUE;
-import static org.springframework.util.MimeTypeUtils.TEXT_HTML_VALUE;
 import static org.ssor.boss.core.entity.ConfirmationType.USER_CONFIRMATION;
 
 @Validated
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = UserController.USERS_ROUTE)
+@RequestMapping(value = UserController.USERS_ROUTE,
+                produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
+                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
 public class UserController
 {
   public static final String USERS_ROUTE = "/api/v1/users";
@@ -50,12 +51,6 @@ public class UserController
   public ResponseEntity<List<SecureUserDetails>> getAllUsers()
   {
     return ResponseEntity.ok(userService.getAllUsersSecure());
-  }
-
-  @GetMapping("/user")
-  public String testRoute()
-  {
-    return "<h1>Hello, user!</h1>";
   }
 
   @PostMapping("/registration")

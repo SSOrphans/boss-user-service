@@ -18,7 +18,6 @@ import org.ssor.boss.core.exception.UserAlreadyExistsException;
 import org.ssor.boss.core.service.UserService;
 import org.ssor.boss.core.transfer.RegisterUserInput;
 import org.ssor.boss.core.transfer.RegisterUserOutput;
-import org.ssor.boss.core.transfer.UpdateUserInput;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UpdateProfileInput;
@@ -101,7 +100,7 @@ public class UserController {
 	public ResponseEntity<String> forgotPasswordEmail(
 			@Valid @RequestBody ForgotPassEmailInput forgotPasswordEmailInput) {
 		controllerService.sendPasswordReset(forgotPasswordEmailInput);
-		return ResponseEntity.status(HttpStatus.ACCEPTED).body("Password reset link sent to email.");
+		return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
 	}
 
 	@PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,

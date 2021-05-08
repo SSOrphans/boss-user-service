@@ -137,6 +137,7 @@ public class ControllerService
 	{
 		try
 		{
+			// TODO: validate token expiration date after AWS SNS
 			if (jwtForgotPassToken.validate(forgotPassTokenInput.getToken()))
 			{
 				String userEmail = jwtForgotPassToken.getUserEmail(forgotPassTokenInput.getToken());

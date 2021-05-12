@@ -37,9 +37,7 @@ import static org.ssor.boss.core.entity.ConfirmationType.USER_CONFIRMATION;
 @Validated
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = UserController.USERS_ROUTE,
-                produces = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE },
-                consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
+@RequestMapping(value = UserController.USERS_ROUTE)
 public class UserController
 {
   public static final String USERS_ROUTE = "/api/v1/users";

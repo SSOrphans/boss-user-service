@@ -42,13 +42,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Override
   protected void configure(HttpSecurity http) throws Exception
   {
-    http.authorizeRequests()
-        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
-        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
+    http.csrf()
+        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
+        .and()
+        .authorizeRequests()
         .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
+        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
         .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
         .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
-        .anyRequest().authenticated().and().formLogin();
+        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
+        .anyRequest().authenticated()
+        .and().formLogin();
   }
 }

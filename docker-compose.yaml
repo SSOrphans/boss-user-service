@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+    boss-user-microservice:
+        build: ./
+        image: boss-user-microservice
+        ports:
+            - 80:8080

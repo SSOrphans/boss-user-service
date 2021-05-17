@@ -1,6 +1,7 @@
 FROM maven as stage1
 COPY ./ /app/boss-user-service
-RUN cd /app/boss-user-service && mvn -q clean package
+WORKDIR /app/boss-user-service
+RUN mvn -q clean package
 
 FROM openjdk
 COPY --from=stage1 /app/boss-user-service /app/boss-user-service

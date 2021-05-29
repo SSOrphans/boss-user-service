@@ -17,12 +17,16 @@ node {
                     }
                 }
                 stage('Quality Analysis') {
-                    withCredentials([string(credentialsId: 'sonar-token', variable: 'sonartoken')]) {
+                    withSonarQubeEnv('SonarQube Server') {
                         withMaven(jdk: 'openjdk-11') {
                             echo "Performing Quality Analysis for $serviceName"
-                            sh 'mvn clean install'
-                            sh 'mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=$sonartoken'
+                            sh 'mvn sonar:sonar'
                         }
+                    }
+                }
+                stage('Quality Gate'){
+                    timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+                        waitForQualityGate abortPipeline: true
                     }
                 }
                 stage('Docker Build') {
@@ -43,7 +47,7 @@ node {
             }
         }
     }
-    catch (exc) {
+    catch (err) {
         echo "Caught: ${err}"
         currentBuild.result = 'FAILURE'
     } finally {

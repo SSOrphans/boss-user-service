@@ -50,10 +50,10 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sub1}}'
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sub2}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-A}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-B}}'
           SecurityGroups:
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sg}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Base-SecGroup}}'
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8080
@@ -134,5 +134,5 @@ Resources:
       Actions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
-      ListenerArn: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:elb-listener-arn}}'
+      ListenerArn: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:listener-arn}}'
       Priority: 10

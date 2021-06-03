@@ -134,5 +134,5 @@ Resources:
       Actions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
-      ListenerArn: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:listener-arn}}'
+      ListenerArn: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:elb-listener-arn}}'
       Priority: 10

@@ -50,10 +50,10 @@ Resources:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
           Subnets:
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-A}}'
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-B}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sub1}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sub2}}'
           SecurityGroups:
-            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Base-SecGroup}}'
+            - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-sg}}'
       LoadBalancers:
         - ContainerName: !Ref ApplicationName
           ContainerPort: 8080
@@ -121,7 +121,7 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: '60'
       TargetType: ip
-      VpcId: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:vpc-id}}'
+      VpcId: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-vpc}}'
 
   ApiListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule

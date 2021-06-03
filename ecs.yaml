@@ -121,7 +121,7 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value: '60'
       TargetType: ip
-      VpcId: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:microservice-vpc}}'
+      VpcId: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:vpc-id}}'
 
   ApiListenerRule:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule

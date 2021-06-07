@@ -88,12 +88,12 @@ Resources:
               Value: !Ref ApplicationEnvironment
             - Name: PORT
               Value: '8080'
-            - Name: DB_HOST_URL
-              Value: !Join
-                - ''
-                - - !Sub 'jdbc:mysql://{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:host}}'
-                  - !Sub ':{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:port}}'
-                  - !Sub '/{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:dbname}}'
+            # - Name: DB_HOST_URL
+            #   Value: !Join
+            #     - ''
+            #     - - !Sub 'jdbc:mysql://{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:host}}'
+            #       - !Sub ':{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:port}}'
+            #       - !Sub '/{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:dbname}}'
           Essential: true
           Memory: 2048
           LogConfiguration:

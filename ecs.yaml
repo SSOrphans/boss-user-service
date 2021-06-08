@@ -48,7 +48,7 @@ Resources:
       LaunchType: FARGATE
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
+          AssignPublicIp: ENABLED
           Subnets:
             - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-A}}'
             - !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:Private-Subnet-B}}'

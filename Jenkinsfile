@@ -1,6 +1,7 @@
 node {
     try {
         withEnv(['serviceName=boss-user', "commitHash=${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"]) {
+            
             stage('Checkout') {
                 echo "Checking out $serviceName"
                 checkout scm

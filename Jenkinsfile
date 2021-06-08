@@ -1,19 +1,15 @@
 node {
     try {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws-cli', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                withEnv(['serviceName=boss-user', "commitHash=${sh(script: 'ls && pwd && git rev-parse --short HEAD', returnStdout: true).trim()}"]) {
-
-                stage('Checkout') {
-                    echo "Checking out $serviceName"
-                    checkout scm
-                    sh 'git submodule update --init'
-                }
-
-                stage('Build') {
+            stage('Checkout') {
+                echo "Checking out $serviceName"
+                checkout scm
+            }
+            withEnv(['serviceName=boss-user', "commitHash=${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"]) {
+            stage('Build') {
                 withMaven(jdk: 'openjdk-11') {
-                        echo "Building $serviceName with maven"
-                        sh 'mvn clean package'
-                    }
+                    echo "Building $serviceName with maven"
+                    sh 'mvn clean package'
                 }
             }
         }

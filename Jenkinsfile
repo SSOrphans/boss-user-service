@@ -6,10 +6,11 @@ node {
                 checkout scm
             }
             withEnv(['serviceName=boss-user', "commitHash=${sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()}"]) {
-            stage('Build') {
-                withMaven(jdk: 'openjdk-11') {
-                    echo "Building $serviceName with maven"
-                    sh 'mvn clean package'
+                stage('Build') {
+                    withMaven(jdk: 'openjdk-11') {
+                        echo "Building $serviceName with maven"
+                        sh 'mvn clean package'
+                    }
                 }
             }
         }

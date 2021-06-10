@@ -42,17 +42,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Override
   protected void configure(HttpSecurity http) throws Exception
   {
-    http.csrf()
-        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
-        .and()
-        .authorizeRequests()
-        .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
-        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
-        .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
-        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
-        .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
-        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
-        .anyRequest().authenticated()
-        .and().formLogin();
+    http.authorizeRequests()
+            .antMatchers("/").permitAll()
+            .antMatchers("/h2-console/**").permitAll();
+
+    http.csrf().disable();
+    http.headers().frameOptions().disable();
+
+//    http.csrf()
+//        .disable()//.ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
+//        .authorizeRequests()
+//        .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
+//        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
+//        .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
+//        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
+//        .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
+//        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
+//        .anyRequest().authenticated()
+//        .and().formLogin();
   }
 }

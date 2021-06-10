@@ -21,6 +21,8 @@ import lombok.Setter;
 @Builder
 public class UpdateProfileInput
 {
+	private int userId;
+
 	@Email(message = "Please provide a valid email")
 	@NotBlank(message = "Please provide a valid email")
 	private String email;

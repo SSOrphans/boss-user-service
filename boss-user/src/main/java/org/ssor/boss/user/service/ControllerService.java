@@ -2,6 +2,7 @@ package org.ssor.boss.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.core.entity.AccountHolder;
 import org.ssor.boss.core.entity.User;
@@ -9,7 +10,9 @@ import org.ssor.boss.core.exception.ForgotPassTokenException;
 import org.ssor.boss.core.exception.UserDataAccessException;
 import org.ssor.boss.core.repository.AccountHolderRepository;
 import org.ssor.boss.core.repository.UserRepository;
-import org.ssor.boss.core.transfer.UpdateUserInput;
+import org.ssor.boss.core.service.AwsSesService;
+import org.ssor.boss.core.service.UserService;
+import org.ssor.boss.core.transfer.Email;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UpdateProfileInput;
@@ -24,6 +27,8 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -39,6 +44,12 @@ public class ControllerService
 
 	@Autowired
 	JwtForgotPassToken jwtForgotPassToken;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	//FIXME: Change email
+	private final String Sender = "derrian.harris@smoothstack.com";
 
 	public Optional<UserInfoOutput> getUserInfo(Integer userId)
 	{
@@ -121,31 +132,34 @@ public class ControllerService
 		}
 	}
 
-	public boolean sendPasswordReset(ForgotPassEmailInput forgotPassEmailInput)
+	public Optional<Email> sendPasswordReset(ForgotPassEmailInput forgotPassEmailInput)
 	{
+		Optional<Email> email = Optional.empty();
 		if (userRepository.existsUserByEmail(forgotPassEmailInput.getEmail()))
 		{
 			// generate token
 			String token = jwtForgotPassToken.generateAccessToken(forgotPassEmailInput.getEmail());
-			// TODO: send password reset to email with AWS SNS
-			return true;
+			String subject = "Forgot password request";
+			String body = "To complete the password reset process, please click here: "
+				+ "http://localhost:4200/login/reset-password?token="+token;
+			email = Optional.of(new Email(Sender,forgotPassEmailInput.getEmail(),subject,body));
 		}
-		return false;
+		return email;
 	}
 
 	public boolean updateForgotPassword(ForgotPassTokenInput forgotPassTokenInput)
 	{
 		try
 		{
-			// TODO: validate token expiration date after AWS SNS
-			if (jwtForgotPassToken.validate(forgotPassTokenInput.getToken()))
-			{
-				String userEmail = jwtForgotPassToken.getUserEmail(forgotPassTokenInput.getToken());
-				Optional<User> userRepo = userRepository.getUserByEmail(userEmail);
-				if (userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null)
-				{
+			String password = forgotPassTokenInput.getPassword();
+			String token = forgotPassTokenInput.getToken();
+			if (jwtForgotPassToken.validate(token)) {
+				List<User> userList = userRepository.findAll();
+				String userEmail = jwtForgotPassToken.getUserEmail(token);
+				Optional<User> userRepo = userRepository.findUserByEmail(userEmail);
+				if (userRepo.isPresent() && userRepo.orElseThrow().getDeleted() == null) {
 					User userEntity = userRepo.get();
-					userEntity.setPassword(forgotPassTokenInput.getPassword());
+					userEntity.setPassword(passwordEncoder.encode(forgotPassTokenInput.getPassword()));
 					userRepository.save(userEntity);
 					return true;
 				}

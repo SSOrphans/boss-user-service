@@ -135,4 +135,4 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
       ListenerArn: !Sub '{{resolve:secretsmanager:SOrphans/${ApplicationEnvironment}:SecretString:listener-arn}}'
-      Priority: 10
+      # Priority: 10

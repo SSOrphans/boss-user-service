@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsUtils;
 import org.ssor.boss.core.service.UserService;
 
 @Configuration
@@ -46,19 +47,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
             .antMatchers("/").permitAll()
             .antMatchers("/h2-console/**").permitAll();
 
-    http.csrf().disable();
-    http.headers().frameOptions().disable();
-
-//    http.csrf()
-//        .disable()//.ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
-//        .authorizeRequests()
-//        .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
-//        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
-//        .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
-//        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
-//        .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
-//        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
-//        .anyRequest().authenticated()
-//        .and().formLogin();
+    http.csrf()
+        .disable()//.ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
+        .authorizeRequests()
+        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+        .requestMatchers(CorsUtils::isCorsRequest).permitAll()
+        .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
+        .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
+        .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
+        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
+        .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
+        .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
+        .anyRequest().authenticated()
+        .and().formLogin();
   }
 }

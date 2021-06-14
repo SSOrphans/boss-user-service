@@ -144,8 +144,8 @@ import static org.ssor.boss.core.entity.ConfirmationType.USER_CONFIRMATION;
 @Validated
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 @RequestMapping(value = UserController.USERS_ROUTE)
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController
 {
   public static final String USERS_ROUTE = "/api/v1/users";
@@ -238,7 +238,7 @@ public class UserController
       @Valid @RequestBody ForgotPassEmailInput forgotPasswordEmailInput) {
     Optional<Email> optEmail = controllerService.sendPasswordReset(forgotPasswordEmailInput);
     if(optEmail.isEmpty()){
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is was an issue finding reset email.");
+      return new ResponseEntity<>(null,HttpStatus.ACCEPTED);
     }
     awsSesService.sendEmail(optEmail.get());
     return new ResponseEntity<>(null, HttpStatus.ACCEPTED);

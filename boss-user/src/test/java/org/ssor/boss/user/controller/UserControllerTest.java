@@ -4,6 +4,7 @@
 package org.ssor.boss.user.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -16,6 +17,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import com.amazonaws.services.simpleemail.model.SendEmailResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -32,11 +34,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.ssor.boss.core.entity.User;
+import org.ssor.boss.core.service.AwsSesService;
 import org.ssor.boss.core.service.UserService;
-import org.ssor.boss.core.transfer.RegisterUserInput;
-import org.ssor.boss.core.transfer.RegisterUserOutput;
-import org.ssor.boss.core.transfer.SecureUserDetails;
-import org.ssor.boss.core.transfer.UpdateUserInput;
+import org.ssor.boss.core.transfer.*;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UpdateProfileInput;
@@ -50,7 +50,7 @@ import org.ssor.boss.user.service.ControllerService;
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
-@WithMockUser(username="gta5",password = "gtaV!@34",authorities = {"USER_DEFAULT"})
+@WithMockUser(username="gta5",password = "gtaV!@34",authorities = {"USER_DEFAULT","USER_VENDOR"})
 public class UserControllerTest
 {
 
@@ -74,6 +74,9 @@ public class UserControllerTest
 
 	@MockBean
 	UserService userService;
+
+	@MockBean
+	AwsSesService awsSesService;
 
 	@MockBean
 	ControllerService controllerService;
@@ -115,7 +118,7 @@ public class UserControllerTest
 	public void updateUserProfileOkTest() throws Exception
 	{
 		when(userService.getSecureUserDetailsWithId(Mockito.anyInt())).thenReturn(Optional.ofNullable(secureUserDetails));
-		when(userService.updateUserProfile(Mockito.any(UpdateUserInput.class))).thenReturn("User profile updated");
+		when(userService.updateUserProfile(any(UpdateUserInput.class))).thenReturn("User profile updated");
 		MockHttpServletResponse mockResponse = mvc
 				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON)
 						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
@@ -190,7 +193,7 @@ public class UserControllerTest
 	@Test
 	public void getAllUserTest() throws Exception
 	{
-		when(userService.getAllUsersUnsecure()).thenReturn(new ArrayList<User>());
+		when(userService.getAllUsersSecure()).thenReturn(new ArrayList<SecureUserDetails>());
 		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users")).andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
@@ -202,7 +205,7 @@ public class UserControllerTest
 		RegisterUserInput registerUserInput = RegisterUserInput.builder().username("user1").email("user1@ss.com")
 				.password("USer!@34").build();
 		RegisterUserOutput registerUserOutput = RegisterUserOutput.builder().username("user1").email("user1@ss.com").build();
-		when(userService.registerNewUser(Mockito.any(RegisterUserInput.class), Mockito.any(Instant.class))).thenReturn(registerUserOutput);
+		when(userService.registerNewUser(any(RegisterUserInput.class), any(Instant.class))).thenReturn(registerUserOutput);
 		MockHttpServletResponse mockResponse = mvc
 				.perform(post("/api/v1/users/registration").contentType(MediaType.APPLICATION_JSON_VALUE)
 						.content(jsonRegisterUserInput.write(registerUserInput).getJson()))
@@ -212,13 +215,15 @@ public class UserControllerTest
 	}
 
 	@Test
-	@Disabled
 	public void forgotPassEmailTest() throws Exception
 	{
 		ForgotPassEmailInput forgotPassEmailInput = new ForgotPassEmailInput();
 		forgotPassEmailInput.setEmail("gta5@ss.com");
+		Email email = new Email("testSender@ss.com",forgotPassEmailInput.getEmail(),"Test subject","Test body");
+		when(controllerService.sendPasswordReset(any(ForgotPassEmailInput.class))).thenReturn(Optional.of(email));
+		when(awsSesService.sendEmail(any(Email.class))).thenReturn(new SendEmailResult());
 		MockHttpServletResponse mockResponse = mvc
-				.perform(post("/api/v1/users/email").contentType(MediaType.APPLICATION_JSON_VALUE)
+				.perform(post("/api/v1/users/forgot-password").contentType(MediaType.APPLICATION_JSON_VALUE)
 						.content(jsonForgotPassEmailInput.write(forgotPassEmailInput).getJson()))
 				.andReturn().getResponse();
 
@@ -226,16 +231,15 @@ public class UserControllerTest
 	}
 
 	@Test
-	@Disabled
 	public void updateForgotPassTest() throws Exception
 	{
 		ForgotPassTokenInput forgotPassTokenInput = new ForgotPassTokenInput();
 		forgotPassTokenInput.setToken(
 				"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyMUBzcy5jb20ifQ.xLWpq08dGG4rr_daYoczPQSWWMH-6QDbGHKLK7bKFoVSJap_j2EjsPn71N4VyllMQX4OAumW9z0RbCu7b2XBOA");
 		forgotPassTokenInput.setPassword("TEst!@34");
-		when(controllerService.updateForgotPassword(Mockito.any(ForgotPassTokenInput.class))).thenReturn(true);
+		when(controllerService.updateForgotPassword(any(ForgotPassTokenInput.class))).thenReturn(true);
 		MockHttpServletResponse mockResponse = mvc
-				.perform(put("/api/v1/users/password").contentType(MediaType.APPLICATION_JSON_VALUE)
+				.perform(put("/api/v1/users/reset-password").contentType(MediaType.APPLICATION_JSON_VALUE)
 						.content(jsonForgotPassTokenInput.write(forgotPassTokenInput).getJson()))
 				.andReturn().getResponse();
 

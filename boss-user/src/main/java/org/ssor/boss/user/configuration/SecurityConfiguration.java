@@ -48,12 +48,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
             .antMatchers("/h2-console/**").permitAll();
 
     http.csrf()
-        .disable()//.ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
+        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration","/api/v*/users/forgot-password","/api/v*/users/reset-password").and()
         .authorizeRequests()
         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
         .requestMatchers(CorsUtils::isCorsRequest).permitAll()
+        .antMatchers().permitAll()
         .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
         .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
+        .antMatchers(HttpMethod.POST, "/api/v*/users/forgot-password").permitAll()
+        .antMatchers(HttpMethod.PUT, "/api/v*/users/reset-password").permitAll()
         .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
         .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")

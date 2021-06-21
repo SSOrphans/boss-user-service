@@ -9,7 +9,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsUtils;
+import org.ssor.boss.core.filter.AuthenticationFilter;
+import org.ssor.boss.core.filter.VerificationFilter;
 import org.ssor.boss.core.service.UserService;
 
 @Configuration
@@ -42,17 +46,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   @Override
   protected void configure(HttpSecurity http) throws Exception
   {
-    http.csrf()
-        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration")
-        .and()
+
+    http
         .authorizeRequests()
+        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+        .requestMatchers(CorsUtils::isCorsRequest).permitAll()
+        .antMatchers().permitAll()
+        .antMatchers("/").permitAll()
+        .antMatchers("/h2-console/**").permitAll()
         .antMatchers(HttpMethod.POST, "/api/v*/users/confirmation").permitAll()
         .antMatchers(HttpMethod.POST, "/api/v*/users/registration").permitAll()
+        .antMatchers(HttpMethod.POST, "/api/v*/users/forgot-password").permitAll()
+        .antMatchers(HttpMethod.PUT, "/api/v*/users/reset-password").permitAll()
         .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
         .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
-        .anyRequest().authenticated()
-        .and().formLogin();
+        .anyRequest().authenticated().and()
+        .addFilter(new AuthenticationFilter(authenticationManager()))
+        .addFilter(new VerificationFilter(authenticationManager()))
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 }

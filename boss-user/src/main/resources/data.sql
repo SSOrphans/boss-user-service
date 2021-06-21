@@ -1,6 +1,6 @@
 --USER
 insert into boss.user (type_id, branch_id, username, email, password, created, deleted, enabled, locked)
-values (2, 1, 'gta5', 'gta5@ss.com', 'gtaV!@34', 0, NULL, true, false);
+values (2, 1, 'gta5', 'gta5@ss.com', '$2y$10$PRt9o6hX8D3uGujy85zM5uo9u3sr57BxuxQDVEb/5OfqJEqMY2tBG', 0, NULL, true, false);
 
 insert into boss.user (type_id, branch_id, username, email, password, created, deleted, enabled, locked)
 values (2, 1, 'user1', 'user1@ss.com', 'USer!@34', 0, NULL, true, false);

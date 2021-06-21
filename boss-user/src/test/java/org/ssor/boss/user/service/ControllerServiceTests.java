@@ -1,14 +1,19 @@
 package org.ssor.boss.user.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.ssor.boss.core.entity.AccountHolder;
 import org.ssor.boss.core.entity.User;
@@ -16,6 +21,7 @@ import org.ssor.boss.core.exception.ForgotPassTokenException;
 import org.ssor.boss.core.exception.UserDataAccessException;
 import org.ssor.boss.core.repository.AccountHolderRepository;
 import org.ssor.boss.core.repository.UserRepository;
+import org.ssor.boss.core.service.UserService;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UpdateProfileInput;
@@ -37,32 +43,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class ControllerServiceTests
 {
 
-	@MockBean
+	@Mock
 	UserRepository userRepository;
 
-	@MockBean
+	@Mock
 	AccountHolderRepository accountHolderRepository;
 
-	@MockBean
+	@Mock
 	JwtForgotPassToken jwtForgotPassToken;
 
-	@TestConfiguration
-	public static class UserServiceTestContextConfig
-	{
-		@Bean
-		public ControllerService controllerService()
-		{
-			return new ControllerService();
-		}
-	}
+	@Mock
+	PasswordEncoder passwordEncoder;
 
-	@Autowired
+	@InjectMocks
 	ControllerService controllerService;
 
 	private User userEntity;
@@ -227,10 +227,10 @@ class ControllerServiceTests
 		when(jwtForgotPassToken.generateAccessToken(forgotPassEmailInput.getEmail())).thenReturn("someValidToken");
 
 		when(userRepository.existsUserByEmail(forgotPassEmailInput.getEmail())).thenReturn(true);
-		assertTrue(controllerService.sendPasswordReset(forgotPassEmailInput));
+		assertTrue(controllerService.sendPasswordReset(forgotPassEmailInput).isPresent());
 
 		when(userRepository.existsUserByEmail(forgotPassEmailInput.getEmail())).thenReturn(false);
-		assertFalse(controllerService.sendPasswordReset(forgotPassEmailInput));
+		assertFalse(controllerService.sendPasswordReset(forgotPassEmailInput).isPresent());
 	}
 
 	@Test
@@ -239,33 +239,36 @@ class ControllerServiceTests
 		// valid token, password, and entity
 		forgotPassTokenInput.setToken("test@ss.com");
 		forgotPassTokenInput.setPassword("someValidPassword");
-		when(jwtForgotPassToken.validate(forgotPassTokenInput.getToken())).thenReturn(true);
-		when(jwtForgotPassToken.getUserEmail(forgotPassTokenInput.getToken())).thenReturn("test@ss.com");
-		when(userRepository.getUserByEmail("test@ss.com")).thenReturn(Optional.of(userEntity));
+		when(jwtForgotPassToken.validate(anyString())).thenReturn(true);
+		when(jwtForgotPassToken.getUserEmail(anyString())).thenReturn("test@ss.com");
+		when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(userEntity));
+		when(passwordEncoder.encode(anyString())).thenReturn("ENCODED_PASSWORD");
 		assertTrue(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// null password
 		forgotPassTokenInput.setPassword(null);
-		when(jwtForgotPassToken.validate(forgotPassTokenInput.getToken())).thenReturn(true);
+		when(jwtForgotPassToken.validate(anyString())).thenReturn(true);
 		assertTrue(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// empty password
 		forgotPassTokenInput.setPassword("");
-		when(jwtForgotPassToken.validate(forgotPassTokenInput.getToken())).thenReturn(true);
+		when(jwtForgotPassToken.validate(anyString())).thenReturn(true);
 		assertTrue(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// invalid token
 		forgotPassTokenInput.setToken("test@ss.com");
-		when(jwtForgotPassToken.validate(forgotPassTokenInput.getToken())).thenReturn(false);
+		when(jwtForgotPassToken.validate(anyString())).thenReturn(false);
 		assertFalse(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// empty entity
-		when(userRepository.getUserByEmail("test@ss.com")).thenReturn(Optional.empty());
+		when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
 		assertFalse(controllerService.updateForgotPassword(forgotPassTokenInput));
 
 		// entity "delete" not null
+		when(jwtForgotPassToken.validate(anyString())).thenReturn(true);
+		when(jwtForgotPassToken.getUserEmail(anyString())).thenReturn("test@ss.com");
+		when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(userEntity));
 		userEntity.setDeleted(Instant.now().toEpochMilli());
-		when(userRepository.getUserByEmail("test@ss.com")).thenReturn(Optional.of(userEntity));
 		assertFalse(controllerService.updateForgotPassword(forgotPassTokenInput));
 	}
 }

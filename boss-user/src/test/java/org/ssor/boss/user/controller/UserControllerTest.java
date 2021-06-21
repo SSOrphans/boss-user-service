@@ -6,20 +6,18 @@ package org.ssor.boss.user.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Optional;
 
 import com.amazonaws.services.simpleemail.model.SendEmailResult;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +31,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.ssor.boss.core.entity.User;
 import org.ssor.boss.core.service.AwsSesService;
 import org.ssor.boss.core.service.UserService;
 import org.ssor.boss.core.transfer.*;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
 import org.ssor.boss.user.dto.UpdateProfileInput;
-import org.ssor.boss.user.dto.UserInfoOutput;
 import org.ssor.boss.user.service.ControllerService;
 
 /**
@@ -100,7 +96,7 @@ public class UserControllerTest
 	public void userInfoOkTest() throws Exception
 	{
 		when(userService.getSecureUserDetailsWithId(Mockito.anyInt())).thenReturn(Optional.ofNullable(secureUserDetails));
-		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/1").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
 	}
@@ -109,7 +105,7 @@ public class UserControllerTest
 	public void userInfoNotFoundTest() throws Exception
 	{
 		when(userService.getSecureUserDetailsWithId(Mockito.anyInt())).thenReturn(Optional.ofNullable(null));
-		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/2")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/2").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
@@ -121,7 +117,7 @@ public class UserControllerTest
 		when(userService.updateUserProfile(any(UpdateUserInput.class))).thenReturn("User profile updated");
 		MockHttpServletResponse mockResponse = mvc
 				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON)
-						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+						.content(jsonUpdateUserInput.write(updateUserInput).getJson()).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
@@ -133,7 +129,7 @@ public class UserControllerTest
 		when(userService.getSecureUserDetailsWithId(Mockito.anyInt())).thenReturn(Optional.empty());
 		MockHttpServletResponse mockResponse = mvc
 				.perform(put("/api/v1/users/2").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonUpdateUserInput.write(updateUserInput).getJson()))
+						.content(jsonUpdateUserInput.write(updateUserInput).getJson()).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
@@ -142,7 +138,7 @@ public class UserControllerTest
 	@Test
 	public void methodNotAllowedTest() throws Exception
 	{
-		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(put("/api/v1/users").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.METHOD_NOT_ALLOWED.value(), mockResponse.getStatus());
 	}
@@ -150,7 +146,7 @@ public class UserControllerTest
 	@Test
 	public void getBadRequestTest() throws Exception
 	{
-		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/not_int")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users/not_int").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
 	}
@@ -158,7 +154,7 @@ public class UserControllerTest
 	@Test
 	public void getUriNotFoundTest() throws Exception
 	{
-		MockHttpServletResponse mockResponse = mvc.perform(get("/randomness")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(get("/randomness").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
@@ -167,7 +163,7 @@ public class UserControllerTest
 	public void putInvalidInputIntegerTypeTest() throws Exception
 	{
 		MockHttpServletResponse mockResponse = mvc
-				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111))
+				.perform(put("/api/v1/users/1").contentType(MediaType.APPLICATION_JSON_VALUE).requestAttr("password", 1111).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), mockResponse.getStatus());
@@ -177,7 +173,7 @@ public class UserControllerTest
 	public void delUserAccountOkTest() throws Exception
 	{
 		when(userService.getSecureUserDetailsWithId(Mockito.anyInt())).thenReturn(Optional.ofNullable(secureUserDetails));
-		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/5")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/5").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
 	}
@@ -185,7 +181,7 @@ public class UserControllerTest
 	@Test
 	public void delUserAccountNotFoundTest() throws Exception
 	{
-		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/999999")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(delete("/api/v1/users/999999").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.NOT_FOUND.value(), mockResponse.getStatus());
 	}
@@ -194,7 +190,7 @@ public class UserControllerTest
 	public void getAllUserTest() throws Exception
 	{
 		when(userService.getAllUsersSecure()).thenReturn(new ArrayList<SecureUserDetails>());
-		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users")).andReturn().getResponse();
+		MockHttpServletResponse mockResponse = mvc.perform(get("/api/v1/users").with(csrf())).andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());
 	}
@@ -208,7 +204,7 @@ public class UserControllerTest
 		when(userService.registerNewUser(any(RegisterUserInput.class), any(Instant.class))).thenReturn(registerUserOutput);
 		MockHttpServletResponse mockResponse = mvc
 				.perform(post("/api/v1/users/registration").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonRegisterUserInput.write(registerUserInput).getJson()))
+						.content(jsonRegisterUserInput.write(registerUserInput).getJson()).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.CREATED.value(), mockResponse.getStatus());
@@ -224,7 +220,7 @@ public class UserControllerTest
 		when(awsSesService.sendEmail(any(Email.class))).thenReturn(new SendEmailResult());
 		MockHttpServletResponse mockResponse = mvc
 				.perform(post("/api/v1/users/forgot-password").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonForgotPassEmailInput.write(forgotPassEmailInput).getJson()))
+						.content(jsonForgotPassEmailInput.write(forgotPassEmailInput).getJson()).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.ACCEPTED.value(), mockResponse.getStatus());
@@ -240,7 +236,7 @@ public class UserControllerTest
 		when(controllerService.updateForgotPassword(any(ForgotPassTokenInput.class))).thenReturn(true);
 		MockHttpServletResponse mockResponse = mvc
 				.perform(put("/api/v1/users/reset-password").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(jsonForgotPassTokenInput.write(forgotPassTokenInput).getJson()))
+						.content(jsonForgotPassTokenInput.write(forgotPassTokenInput).getJson()).with(csrf()))
 				.andReturn().getResponse();
 
 		assertEquals(HttpStatus.OK.value(), mockResponse.getStatus());

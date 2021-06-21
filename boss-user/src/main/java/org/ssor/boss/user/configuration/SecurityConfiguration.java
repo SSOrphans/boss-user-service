@@ -9,8 +9,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsUtils;
+import org.ssor.boss.core.filter.AuthenticationFilter;
+import org.ssor.boss.core.filter.VerificationFilter;
 import org.ssor.boss.core.service.UserService;
 
 @Configuration
@@ -44,8 +47,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   protected void configure(HttpSecurity http) throws Exception
   {
 
-    http.csrf()
-        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration","/api/v*/users/forgot-password","/api/v*/users/reset-password").and()
+    http
         .authorizeRequests()
         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
         .requestMatchers(CorsUtils::isCorsRequest).permitAll()
@@ -61,6 +63,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
         .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
         .anyRequest().authenticated().and()
-        .formLogin();
+        .addFilter(new AuthenticationFilter(authenticationManager()))
+        .addFilter(new VerificationFilter(authenticationManager()))
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 }

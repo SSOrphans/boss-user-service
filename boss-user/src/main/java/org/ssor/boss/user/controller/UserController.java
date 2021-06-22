@@ -145,7 +145,7 @@ import static org.ssor.boss.core.entity.ConfirmationType.USER_CONFIRMATION;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = UserController.USERS_ROUTE)
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
 public class UserController
 {
   public static final String USERS_ROUTE = "/api/v1/users";

@@ -47,7 +47,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   protected void configure(HttpSecurity http) throws Exception
   {
 
-    http
+    http.csrf()
+        .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration","/api/v*/users/forgot-password","/api/v*/users/reset-password").and()
         .authorizeRequests()
         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
         .requestMatchers(CorsUtils::isCorsRequest).permitAll()

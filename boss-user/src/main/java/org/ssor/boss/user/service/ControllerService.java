@@ -5,18 +5,17 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.ssor.boss.core.entity.AccountHolder;
+import org.ssor.boss.core.entity.Settings;
 import org.ssor.boss.core.entity.User;
 import org.ssor.boss.core.exception.ForgotPassTokenException;
 import org.ssor.boss.core.exception.UserDataAccessException;
 import org.ssor.boss.core.repository.AccountHolderRepository;
+import org.ssor.boss.core.repository.SettingsRepository;
 import org.ssor.boss.core.repository.UserRepository;
 import org.ssor.boss.core.service.AwsSesService;
 import org.ssor.boss.core.service.UserService;
 import org.ssor.boss.core.transfer.Email;
-import org.ssor.boss.user.dto.ForgotPassEmailInput;
-import org.ssor.boss.user.dto.ForgotPassTokenInput;
-import org.ssor.boss.user.dto.UpdateProfileInput;
-import org.ssor.boss.user.dto.UserInfoOutput;
+import org.ssor.boss.user.dto.*;
 import org.ssor.boss.user.security.JwtForgotPassToken;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,6 +39,9 @@ public class ControllerService
 	UserRepository userRepository;
 
 	@Autowired
+	SettingsRepository settingsRepository;
+
+	@Autowired
 	AccountHolderRepository accountHolderRepository;
 
 	@Autowired
@@ -49,7 +51,7 @@ public class ControllerService
 	PasswordEncoder passwordEncoder;
 
 	//FIXME: Change email
-	private final String Sender = "derrian.harris@smoothstack.com";
+	private final String Sender = "bankofsmoothstack@gmail.com";
 
 	public Optional<UserInfoOutput> getUserInfo(Integer userId)
 	{
@@ -70,7 +72,8 @@ public class ControllerService
 						.city(userAccount.map(user -> user.getCity()).orElseThrow())
 						.state(userAccount.map(user -> user.getState()).orElseThrow())
 						.zip(userAccount.map(user -> user.getZip()).orElseThrow())
-						.phone(userAccount.map(user -> user.getPhone()).orElseThrow()).build();
+						.phone(userAccount.map(user -> user.getPhone()).orElseThrow())
+						.settings(userAccount.map(user -> user.getUserSettings()).orElseThrow()).build();
 				return Optional.ofNullable(userInfoDto);
 			}
 			return Optional.empty();
@@ -102,6 +105,29 @@ public class ControllerService
 
 				userRepository.save(userEntity);
 				accountHolderRepository.save(accountHolder);
+				return true;
+			}
+			return false;
+		} catch (DataAccessException | IllegalArgumentException | NoSuchElementException ex)
+		{
+			// TODO: log exception
+			throw new UserDataAccessException("There is an issue accessing data. ");
+		}
+	}
+
+	public boolean updateUserSettings(Integer userId, UserSettingsInput userSettingsInput)
+	{
+		try
+		{
+
+			Optional<Settings> settingsRepo = settingsRepository.findByAccountHolder_UserId(userId);
+			if (settingsRepo.isPresent())
+			{
+				Settings settings = settingsRepo.get();
+
+				settings.setBalanceAlerts(userSettingsInput.getBalanceAlerts());
+				settings.setTransactionAlerts(userSettingsInput.getTransactionAlerts());
+				settingsRepository.save(settings);
 				return true;
 			}
 			return false;

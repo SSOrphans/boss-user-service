@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.ssor.boss.core.entity.Settings;
 
 /**
  * @author Christian Angeles
@@ -27,4 +28,5 @@ public class UserInfoOutput {
 	private String state;
 	private Integer zip;
 	private String phone;
+	private Settings settings;
 }

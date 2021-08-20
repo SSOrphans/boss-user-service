@@ -16,6 +16,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.ssor.boss.core.entity.AccountHolder;
+import org.ssor.boss.core.entity.Settings;
 import org.ssor.boss.core.entity.User;
 import org.ssor.boss.core.exception.ForgotPassTokenException;
 import org.ssor.boss.core.exception.UserDataAccessException;
@@ -71,6 +72,7 @@ class ControllerServiceTests
 	private UpdateProfileInput updateProfileInput;
 	private ForgotPassEmailInput forgotPassEmailInput;
 	private ForgotPassTokenInput forgotPassTokenInput;
+	private Settings userSettings;
 
 	@BeforeEach
 	void setup()
@@ -79,8 +81,9 @@ class ControllerServiceTests
 		LocalDate date = LocalDate.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault());
 		userEntity = User.builder().id(1).username("test").email("test@ss.com").password("TEst!@34").created(time)
 				.deleted(null).build();
-		userAccount = AccountHolder.builder().fullName("Test Sample").dob(date).address("address").city("city")
-				.state("state").zip(12345).phone("1234567").build();
+		userSettings = Settings.builder().id(1).balanceAlerts(1).transactionAlerts(1).build();
+		userAccount = AccountHolder.builder().userId(1).ssn("123456789").fullName("Test Sample").dob(date).address("address").city("city")
+				.state("state").zip(12345).phone("1234567").userSettings(userSettings).build();
 		userInfoOutput = UserInfoOutput.builder().username("test").email("test@ss.com").created(date)
 				.fullName("Test Sample").dob(date).address("address").city("city").state("state").zip(12345).phone("1234567")
 				.build();

@@ -47,7 +47,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
   protected void configure(HttpSecurity http) throws Exception
   {
 
-    http.csrf()
+    http.cors().and().csrf()
         .ignoringAntMatchers("/api/v*/users/confirmation", "/api/v*/users/registration","/api/v*/users/forgot-password","/api/v*/users/reset-password").and()
         .authorizeRequests()
         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
@@ -60,7 +60,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
         .antMatchers(HttpMethod.POST, "/api/v*/users/forgot-password").permitAll()
         .antMatchers(HttpMethod.PUT, "/api/v*/users/reset-password").permitAll()
         .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
-        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
+        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}").hasAnyAuthority("USER_DEFAULT")
+        .antMatchers(HttpMethod.GET, "/api/v*/users/{\\d+}/profile").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
+        .antMatchers(HttpMethod.PUT, "/api/v*/users/{\\d+}/settings").hasAnyAuthority("USER_DEFAULT", "USER_VENDOR")
         .antMatchers(HttpMethod.DELETE, "/api/v*/users/{\\d+}").hasAuthority("USER_DEFAULT")
         .antMatchers(HttpMethod.GET, "/api/v*/users").hasAuthority("USER_VENDOR")
         .anyRequest().authenticated().and()

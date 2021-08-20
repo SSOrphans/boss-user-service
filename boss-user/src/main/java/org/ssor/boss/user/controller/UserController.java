@@ -1,118 +1,3 @@
-//package org.ssor.boss.user.controller;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.CrossOrigin;
-//import org.springframework.web.bind.annotation.DeleteMapping;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.PutMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RestController;
-//import org.ssor.boss.core.entity.User;
-//import org.ssor.boss.core.exception.UserAlreadyExistsException;
-//import org.ssor.boss.core.service.UserService;
-//import org.ssor.boss.core.transfer.RegisterUserInput;
-//import org.ssor.boss.core.transfer.RegisterUserOutput;
-//import org.ssor.boss.user.dto.ForgotPassEmailInput;
-//import org.ssor.boss.user.dto.ForgotPassTokenInput;
-//import org.ssor.boss.user.dto.UpdateProfileInput;
-//import org.ssor.boss.user.dto.UserInfoOutput;
-//import org.ssor.boss.user.service.ControllerService;
-//
-//import java.time.Instant;
-//import java.util.Optional;
-//
-//import javax.validation.Valid;
-//
-//import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-//import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
-//
-//@RestController
-//@RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-//@CrossOrigin
-//public class UserController {
-//  public static final String USERS_ROUTE = "/api/v1/users";
-//
-//  private UserService userService;
-//
-//  @Autowired
-//  public void setUserService(UserService userService) {
-//    this.userService = userService;
-//  }
-//
-//  @Autowired
-//  ControllerService controllerService;
-//
-//  @GetMapping(value = USERS_ROUTE)
-//  public Iterable<User> getAllUsers() {
-//    return userService.getAllUsersUnsecure();
-//  }
-//
-//  @PostMapping(value = USERS_ROUTE, consumes = { APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE })
-//  public ResponseEntity<Object> addNewUser(@RequestBody RegisterUserInput registerUserInput) {
-//    RegisterUserOutput registerUserOutput;
-//    try {
-//      registerUserOutput = userService.registerNewUser(registerUserInput, Instant.now());
-//    } catch (IllegalArgumentException iae) {
-//      // Bad request.
-//      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-//    } catch (UserAlreadyExistsException uaee) {
-//      return new ResponseEntity<>(uaee.getMessage(), HttpStatus.CONFLICT);
-//    }
-//
-//    return new ResponseEntity<>(registerUserOutput, HttpStatus.CREATED);
-//  }
-//
-//  @GetMapping(path = USERS_ROUTE + "/{user_id}")
-//  public ResponseEntity<Object> getUserInfo(@PathVariable("user_id") Integer userId) {
-//    Optional<UserInfoOutput> userInfoOutput = controllerService.getUserInfo(userId);
-//    if (userInfoOutput.isPresent()) {
-//      return ResponseEntity.status(HttpStatus.OK).body(userInfoOutput.get());
-//    }
-//    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
-//  }
-//
-//  @PutMapping(path = USERS_ROUTE + "/{user_id}", consumes = { MediaType.APPLICATION_JSON_VALUE,
-//                                                              MediaType.APPLICATION_XML_VALUE })
-//  public ResponseEntity<String> updateUserProfile(@PathVariable("user_id") Integer userId,
-//                                                  @Valid @RequestBody UpdateProfileInput updateProfileInput) {
-//    if (controllerService.updateUserProfile(userId, updateProfileInput)) {
-//      return new ResponseEntity<>(null, HttpStatus.OK);
-//    }
-//    return new ResponseEntity<>("User does not exist.", HttpStatus.NOT_FOUND);
-//  }
-//
-//  @DeleteMapping(path = USERS_ROUTE + "/{user_id}")
-//  public ResponseEntity<String> deleteUserAccount(@PathVariable("user_id") Integer userId) {
-//    if (controllerService.deleteUserAccount(userId)) {
-//      return new ResponseEntity<>(null, HttpStatus.OK);
-//    }
-//    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User does not exist.");
-//  }
-//
-//  @PostMapping(path = "/api/v1/user/email", consumes = { MediaType.APPLICATION_JSON_VALUE,
-//                                                         MediaType.APPLICATION_XML_VALUE })
-//  public ResponseEntity<String> forgotPasswordEmail(
-//      @Valid @RequestBody ForgotPassEmailInput forgotPasswordEmailInput) {
-//    controllerService.sendPasswordReset(forgotPasswordEmailInput);
-//    return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
-//  }
-//
-//  @PutMapping(path = "/api/v1/user/password", consumes = { MediaType.APPLICATION_JSON_VALUE,
-//                                                           MediaType.APPLICATION_XML_VALUE })
-//  public ResponseEntity<String> updateForgotPassword(
-//      @Valid @RequestBody ForgotPassTokenInput forgotPasswordTokenInput) {
-//    if (controllerService.updateForgotPassword(forgotPasswordTokenInput)) {
-//      return new ResponseEntity<>(null, HttpStatus.OK);
-//    }
-//    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is was an issue updating the password.");
-//  }
-//}
 package org.ssor.boss.user.controller;
 
 import lombok.AllArgsConstructor;
@@ -126,6 +11,7 @@ import org.ssor.boss.core.service.UserService;
 import org.ssor.boss.core.transfer.*;
 import org.ssor.boss.user.dto.ForgotPassEmailInput;
 import org.ssor.boss.user.dto.ForgotPassTokenInput;
+import org.ssor.boss.user.dto.UserSettingsInput;
 import org.ssor.boss.user.service.ControllerService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -139,7 +25,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_XML_VALUE;
-import static org.ssor.boss.core.entity.ConfirmationType.USER_CONFIRMATION;
 
 @Validated
 @RestController
@@ -205,6 +90,23 @@ public class UserController
     return ResponseEntity.status(NOT_FOUND).body(response);
   }
 
+  @GetMapping("/{user_id}/profile")
+  public ResponseEntity<Object> getUserProfileInfo(@PathVariable("user_id") int userId, HttpServletRequest request)
+  {
+    var userProfile = controllerService.getUserInfo(userId);
+    if (userProfile.isPresent())
+      return ResponseEntity.ok(userProfile.get());
+
+    final var response = new ApiRequestResponse();
+    response.setTimestamp(Instant.now().toEpochMilli());
+    response.setStatus(NOT_FOUND.value());
+    response.setReason(NOT_FOUND.getReasonPhrase());
+    response.setMessage(String.format("User with id %d was not found", userId));
+    response.setPath(request.getServletPath());
+    response.setValidationErrors(new HashMap<>());
+    return ResponseEntity.status(NOT_FOUND).body(response);
+  }
+
   @PutMapping(path ="/{user_id}",consumes = { APPLICATION_JSON_VALUE,
           APPLICATION_XML_VALUE })
   public ResponseEntity<ApiRequestResponse>
@@ -218,6 +120,18 @@ public class UserController
     // User was found.
     updateUserInput.setUserId(userId);
     return okResponse(request, userService.updateUserProfile(updateUserInput));
+  }
+
+  @PutMapping(path ="/{user_id}/settings",consumes = { APPLICATION_JSON_VALUE,
+          APPLICATION_XML_VALUE })
+  public ResponseEntity<ApiRequestResponse>
+  updateUserSettings(@PathVariable("user_id") int userId, @Valid @RequestBody UserSettingsInput userSettingsInput,
+                    HttpServletRequest request)
+  {
+    if (!controllerService.updateUserSettings(userId,userSettingsInput))
+      return notFoundResponse(request, String.format("User with id %d not found", userId));
+
+    return new ResponseEntity<>(null, HttpStatus.OK);
   }
 
   @DeleteMapping("/{user_id}")
